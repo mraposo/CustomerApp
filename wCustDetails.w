@@ -55,6 +55,10 @@ CREATE WIDGET-POOL.
 DEFINE VARIABLE giCustNum AS INTEGER NO-UNDO.
 DEFINE VARIABLE ghProcLib AS HANDLE NO-UNDO.
 DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
+DEFINE VARIABLE lLastNavButtons AS LOGICAL NO-UNDO.
+DEFINE VARIABLE lFirstNavButtons AS LOGICAL NO-UNDO.
+
+DEFINE VARIABLE hCursor AS HANDLE NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -85,7 +89,7 @@ ttCustomers.Phone ttCustomers.EmailAddress ttCustomers.SalesRep
 
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-14 BtnDone BtnFirst BtnPrev BtnNext ~
+&Scoped-Define ENABLED-OBJECTS RECT-14 BtnDone BtnFirst btnPrev BtnNext ~
 BtnLast 
 &Scoped-Define DISPLAYED-FIELDS ttCustomers.CustNum ttCustomers.Name ~
 ttCustomers.Address ttCustomers.Address2 ttCustomers.State ttCustomers.City ~
@@ -132,7 +136,7 @@ DEFINE BUTTON BtnNext
      SIZE 5 BY 1.14
      BGCOLOR 8 .
 
-DEFINE BUTTON BtnPrev 
+DEFINE BUTTON btnPrev 
      IMAGE-UP FILE "adeicon/prev.bmp":U
      LABEL "&Prev" 
      SIZE 5 BY 1.14
@@ -153,7 +157,7 @@ DEFINE QUERY DEFAULT-FRAME FOR
 DEFINE FRAME DEFAULT-FRAME
      BtnDone AT ROW 2.19 COL 80 WIDGET-ID 24
      BtnFirst AT ROW 3.38 COL 80 WIDGET-ID 26
-     BtnPrev AT ROW 3.38 COL 85 WIDGET-ID 30
+     btnPrev AT ROW 3.38 COL 85 WIDGET-ID 30
      BtnNext AT ROW 3.38 COL 90 WIDGET-ID 28
      BtnLast AT ROW 3.38 COL 95 WIDGET-ID 32
      ttCustomers.CustNum AT ROW 3.62 COL 19 COLON-ALIGNED WIDGET-ID 50
@@ -243,7 +247,7 @@ DEFINE FRAME DEFAULT-FRAME
 IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
-         TITLE              = "<insert window title>"
+         TITLE              = "Customer Details"
          HEIGHT             = 15.24
          WIDTH              = 106.2
          MAX-HEIGHT         = 19.71
@@ -318,7 +322,7 @@ THEN C-Win:HIDDEN = no.
 
 &Scoped-define SELF-NAME C-Win
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
-ON END-ERROR OF C-Win /* <insert window title> */
+ON END-ERROR OF C-Win /* Customer Details */
 OR ENDKEY OF {&WINDOW-NAME} ANYWHERE DO:
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
@@ -331,7 +335,7 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
-ON WINDOW-CLOSE OF C-Win /* <insert window title> */
+ON WINDOW-CLOSE OF C-Win /* Customer Details */
 DO:
   /* This event will close the window and terminate the procedure.  */
   APPLY "CLOSE":U TO THIS-PROCEDURE.
@@ -360,11 +364,16 @@ END.
 ON CHOOSE OF BtnFirst IN FRAME DEFAULT-FRAME /* First */
 DO:
       FIND FIRST ttCustomers NO-LOCK.
+       IF NOT CAN-FIND(ttCustomers) THEN 
+        lFirstNavButtons = YES.
+        
       DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
       PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "First").
       PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).  //updates the Order Window
       RUN SetWindowName(ttCustomers.NAME).
       giCustNum = ttCustomers.CustNum.
+      
+      lLastNavButtons = NO.
       RUN SetButtons.
 END.
 
@@ -376,12 +385,17 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnLast C-Win
 ON CHOOSE OF BtnLast IN FRAME DEFAULT-FRAME /* Last */
 DO:
-     FIND LAST ttCustomers NO-LOCK.
+      FIND LAST ttCustomers NO-LOCK.
+      IF NOT CAN-FIND(ttCustomers) THEN 
+        lLastNavButtons = YES.
+        
       DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
       PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Last").
-      PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).
+      PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME). //Update the Order-view  Window
       RUN SetWindowName(ttCustomers.NAME).
       giCustNum = ttCustomers.CustNum.
+      
+      lFirstNavButtons = NO.
       RUN SetButtons.
 END.
 
@@ -393,26 +407,18 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnNext C-Win
 ON CHOOSE OF BtnNext IN FRAME DEFAULT-FRAME /* Next */
 DO:
-        /*
-      GET NEXT {&FRAME-NAME}.
-      IF NOT AVAILABLE {&FIRST-TABLE-IN-QUERY-{&FRAME-NAME}}
-          THEN GET LAST {&FRAME-NAME}.
-      IF AVAILABLE {&FIRST-TABLE-IN-QUERY-{&FRAME-NAME}} THEN DO:
-          DISPLAY {&FIELDS-IN-QUERY-{&FRAME-NAME}} WITH FRAME {&FRAME-NAME}.
-   {&OPEN-BROWSERS-IN-QUERY-{&FRAME-NAME}}
-      END.
-        */
-        
+      
         FIND NEXT ttCustomers NO-LOCK.
-        IF AVAILABLE ttCustomers THEN
-        DO:
-        DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.   
-        END.
-        
+        IF NOT AVAILABLE ttCustomers THEN 
+            lLastNavButtons = NO.  
+            
+  DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.      
   PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Next").
   PUBLISH "fetchOrders":U(ttCustomers.CustNum,Customer.NAME).
   RUN SetWindowName(ttCustomers.NAME).
   giCustNum = ttCustomers.CustNum.
+  
+  lFirstNavButtons = NO.
   RUN SetButtons.
 END.
 
@@ -420,19 +426,19 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME BtnPrev
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnPrev C-Win
-ON CHOOSE OF BtnPrev IN FRAME DEFAULT-FRAME /* Prev */
+&Scoped-define SELF-NAME btnPrev
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnPrev C-Win
+ON CHOOSE OF btnPrev IN FRAME DEFAULT-FRAME /* Prev */
 DO:
     FIND PREV ttCustomers NO-LOCK.
-     IF AVAILABLE ttCustomers THEN
-     DO:
-        DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
-     END.
+    
+    DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
     PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Prev").
     PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).
     RUN SetWindowName(ttCustomers.NAME).
     giCustNum = ttCustomers.CustNum.
+    
+    lLastNavButtons = NO.
     RUN SetButtons.
 END.
 
@@ -532,7 +538,7 @@ PROCEDURE enable_UI :
           ttCustomers.PostalCode ttCustomers.Country ttCustomers.Phone 
           ttCustomers.EmailAddress ttCustomers.SalesRep 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
-  ENABLE RECT-14 BtnDone BtnFirst BtnPrev BtnNext BtnLast 
+  ENABLE RECT-14 BtnDone BtnFirst btnPrev BtnNext BtnLast 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
   VIEW C-Win.
@@ -592,25 +598,37 @@ PROCEDURE SetButtons :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
- /*
- IF giCustNum = 1 THEN
+ IF lLastNavButtons THEN
+ DO:
+    DISABLE 
+        btnLast
+        btnNext
+        WITH FRAME {&FRAME-NAME}.  
+ END. 
+ IF lLastNavButtons = NO THEN
+ DO:              
+        ENABLE
+        btnLast
+        btnNext
+        WITH FRAME {&FRAME-NAME}.
+ END.
+ 
+ 
+ IF lFirstNavButtons THEN
  DO:
     DISABLE 
         btnFirst
         btnPrev
-        WITH FRAME {&FRAME-NAME}.  
+    WITH FRAME {&FRAME-NAME}.   
  END.
- 
- ELSE IF giCustNum > 1 THEN
- DO:              
-        ENABLE
+ IF lFirstNavButtons = NO THEN
+ DO:
+     ENABLE
         btnFirst
         btnPrev
         WITH FRAME {&FRAME-NAME}.
-  
  END.
- */  
-
+ 
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

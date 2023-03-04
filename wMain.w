@@ -239,7 +239,7 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW PDC-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "Customers"
-         HEIGHT             = 16.38
+         HEIGHT             = 16.48
          WIDTH              = 106.8
          MAX-HEIGHT         = 39.67
          MAX-WIDTH          = 156
@@ -364,11 +364,15 @@ DO:
 
   hSortColumn = BROWSE brCustomers:CURRENT-COLUMN.
   hQueryHandle = BROWSE brCustomers:QUERY.
-  hQueryHandle:QUERY-CLOSE().
+  //hQueryHandle:QUERY-CLOSE().
   hQueryHandle:QUERY-PREPARE("FOR EACH ttCustomers NO-LOCK BY " + hSortColumn:NAME).
   hQueryHandle:QUERY-OPEN().
   
+
   APPLY "VALUE-CHANGED" TO brCustomers.
+  REPOSITION brCustomers TO ROWID ROWID(ttCustomers). /* hiermee wou ik de focus van de browse vast houden..
+                                                            maar dat lukt nog niet */
+                                                       
 END.
 
 /* _UIB-CODE-BLOCK-END */
