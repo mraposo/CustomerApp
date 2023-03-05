@@ -127,6 +127,13 @@ FUNCTION NameValidation RETURNS CHARACTER
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD PostalcodeValidation mainFrame 
+FUNCTION PostalcodeValidation RETURNS CHARACTER
+  ( INPUT cPostalCode AS CHARACTER )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 
 /* ***********************  Control Definitions  ********************** */
 
@@ -202,7 +209,7 @@ DEFINE FRAME mainFrame
           SIZE 11 BY .62 AT ROW 1.24 COL 12 WIDGET-ID 28
           FGCOLOR 1 FONT 6
      RECT-19 AT ROW 1.48 COL 5 WIDGET-ID 26
-     SPACE(2.39) SKIP(0.41)
+     SPACE(2.39) SKIP(0.65)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
          TITLE "Customer Maintenance"
@@ -309,6 +316,21 @@ END.
 ON LEAVE OF ttCustomerUpd.Name IN FRAME mainFrame /* Name */
 DO:
   ttCustomerUpd.Name:SCREEN-VALUE = NameValidation(ttCustomerUpd.NAME:INPUT-VALUE).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME ttCustomerUpd.PostalCode
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL ttCustomerUpd.PostalCode mainFrame
+ON LEAVE OF ttCustomerUpd.PostalCode IN FRAME mainFrame /* Postal Code */
+DO:
+  IF ttCustomerUpd.Country:INPUT-VALUE = "NL" OR  
+     ttCustomerUpd.Country:INPUT-VALUE = "Nederland" THEN
+  DO:
+     ttCustomerUpd.PostalCode:SCREEN-VALUE = PostalcodeValidation(ttCustomerUpd.PostalCode:INPUT-VALUE).
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -522,16 +544,19 @@ PROCEDURE ProcessForm :
             END.
             APPLY "END-ERROR":U TO SELF. //SLUITEN NA HET OPLSLAAN
          END. 
-         ELSE DO:
+         ELSE DO: 
+            RETURN.
+           /*
             FIND FIRST ttCustomerUpd.
             IF pcMode = "New" THEN
                 DO:
                     pcMode = "Mod".
                 END.
-            END.
-        END.
-     END.
-     DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
+            */   
+         END.
+      END.
+   END.
+   DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -612,6 +637,27 @@ FUNCTION NameValidation RETURNS CHARACTER
     END.
 
     RETURN cOutput.
+END FUNCTION.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION PostalcodeValidation mainFrame 
+FUNCTION PostalcodeValidation RETURNS CHARACTER
+  ( INPUT cPostalCode AS CHARACTER ) :
+/*------------------------------------------------------------------------------
+  Purpose:  
+    Notes:  
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE cOutput AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE iCount AS INTEGER NO-UNDO.
+  
+  DO iCount = 1 TO NUM-ENTRIES(cPostalCode):
+    cOutput = SUBSTRING(ENTRY(iCount,cPostalCode),1,4) + " " + CAPS(SUBSTRING(ENTRY(iCount,cPostalCode),5,6)).
+  MESSAGE LENGTH(cPostalCode) VIEW-AS ALERT-BOX.
+  END.
+  RETURN cOutput.   /* Function return value. */
+
 END FUNCTION.
 
 /* _UIB-CODE-BLOCK-END */
