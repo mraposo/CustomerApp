@@ -51,6 +51,7 @@ DEFINE OUTPUT PARAMETER TABLE FOR ttCustomerUpd.
 //DEFINE VARIABLE glResponse AS LOGICAL NO-UNDO.
 
 DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
+DEFINE VARIABLE lEmailCheck AS LOGICAL NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -78,8 +79,7 @@ ttCustomerUpd.CustNum
 &Scoped-define ENABLED-FIELDS-IN-QUERY-mainFrame ttCustomerUpd.Name ~
 ttCustomerUpd.Address ttCustomerUpd.Address2 ttCustomerUpd.City ~
 ttCustomerUpd.State ttCustomerUpd.Country ttCustomerUpd.PostalCode ~
-ttCustomerUpd.Phone ttCustomerUpd.EmailAddress ttCustomerUpd.SalesRep ~
-ttCustomerUpd.CustNum 
+ttCustomerUpd.Phone ttCustomerUpd.EmailAddress ttCustomerUpd.SalesRep 
 &Scoped-define ENABLED-TABLES-IN-QUERY-mainFrame ttCustomerUpd
 &Scoped-define FIRST-ENABLED-TABLE-IN-QUERY-mainFrame ttCustomerUpd
 &Scoped-define QUERY-STRING-mainFrame FOR EACH ttCustomerUpd SHARE-LOCK
@@ -92,7 +92,7 @@ ttCustomerUpd.CustNum
 &Scoped-Define ENABLED-FIELDS ttCustomerUpd.Name ttCustomerUpd.Address ~
 ttCustomerUpd.Address2 ttCustomerUpd.City ttCustomerUpd.State ~
 ttCustomerUpd.Country ttCustomerUpd.PostalCode ttCustomerUpd.Phone ~
-ttCustomerUpd.EmailAddress ttCustomerUpd.SalesRep ttCustomerUpd.CustNum 
+ttCustomerUpd.EmailAddress ttCustomerUpd.SalesRep 
 &Scoped-define ENABLED-TABLES ttCustomerUpd
 &Scoped-define FIRST-ENABLED-TABLE ttCustomerUpd
 &Scoped-Define ENABLED-OBJECTS btnSave Btn_Cancel RECT-19 
@@ -110,6 +110,29 @@ ttCustomerUpd.EmailAddress ttCustomerUpd.SalesRep ttCustomerUpd.CustNum
 /* _UIB-PREPROCESSOR-BLOCK-END */
 &ANALYZE-RESUME
 
+
+/* ************************  Function Prototypes ********************** */
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD EmailValidation mainFrame 
+FUNCTION EmailValidation RETURNS LOGICAL
+  ( INPUT cEmail AS CHARACTER )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD NameValidation mainFrame 
+FUNCTION NameValidation RETURNS CHARACTER
+  ( INPUT cNaam AS CHARACTER )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD PostalcodeValidation mainFrame 
+FUNCTION PostalcodeValidation RETURNS CHARACTER
+  ( INPUT cPostalCode AS CHARACTER )  FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
 
 
 /* ***********************  Control Definitions  ********************** */
@@ -186,7 +209,7 @@ DEFINE FRAME mainFrame
           SIZE 11 BY .62 AT ROW 1.24 COL 12 WIDGET-ID 28
           FGCOLOR 1 FONT 6
      RECT-19 AT ROW 1.48 COL 5 WIDGET-ID 26
-     SPACE(2.59) SKIP(0.41)
+     SPACE(2.39) SKIP(0.65)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
          TITLE "Customer Maintenance"
@@ -235,7 +258,7 @@ ASSIGN
 /* SETTINGS FOR FILL-IN ttCustomerUpd.Country IN FRAME mainFrame
    ALIGN-L                                                              */
 /* SETTINGS FOR FILL-IN ttCustomerUpd.CustNum IN FRAME mainFrame
-   ALIGN-L                                                              */
+   NO-ENABLE ALIGN-L                                                    */
 /* SETTINGS FOR FILL-IN ttCustomerUpd.EmailAddress IN FRAME mainFrame
    ALIGN-L                                                              */
 /* SETTINGS FOR FILL-IN ttCustomerUpd.Name IN FRAME mainFrame
@@ -282,6 +305,32 @@ END.
 ON CHOOSE OF btnSave IN FRAME mainFrame /* Save */
 DO:
   RUN ProcessForm. 
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME ttCustomerUpd.Name
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL ttCustomerUpd.Name mainFrame
+ON LEAVE OF ttCustomerUpd.Name IN FRAME mainFrame /* Name */
+DO:
+  ttCustomerUpd.Name:SCREEN-VALUE = NameValidation(ttCustomerUpd.NAME:INPUT-VALUE).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME ttCustomerUpd.PostalCode
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL ttCustomerUpd.PostalCode mainFrame
+ON LEAVE OF ttCustomerUpd.PostalCode IN FRAME mainFrame /* Postal Code */
+DO:
+  IF ttCustomerUpd.Country:INPUT-VALUE = "NL" OR  
+     ttCustomerUpd.Country:INPUT-VALUE = "Nederland" THEN
+  DO:
+     ttCustomerUpd.PostalCode:SCREEN-VALUE = PostalcodeValidation(ttCustomerUpd.PostalCode:INPUT-VALUE).
+  END.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -359,7 +408,7 @@ PROCEDURE enable_UI :
          ttCustomerUpd.City ttCustomerUpd.State ttCustomerUpd.Country 
          ttCustomerUpd.PostalCode ttCustomerUpd.Phone 
          ttCustomerUpd.EmailAddress ttCustomerUpd.SalesRep btnSave Btn_Cancel 
-         ttCustomerUpd.CustNum RECT-19 
+         RECT-19 
       WITH FRAME mainFrame.
   VIEW FRAME mainFrame.
   {&OPEN-BROWSERS-IN-QUERY-mainFrame}
@@ -414,8 +463,10 @@ PROCEDURE ProcessForm :
   Notes:       
 ------------------------------------------------------------------------------*/
   DEFINE VARIABLE lAnswer AS LOGICAL NO-UNDO.
-      
+  
   DO WITH FRAME {&FRAME-NAME}:
+  lEmailCheck = EmailValidation(ttCustomerUpd.EmailAddress:INPUT-VALUE).
+  
       IF ttCustomerUpd.Name:INPUT-VALUE = "" THEN
         DO:
             MESSAGE "Naam vergeten in te vullen!" 
@@ -469,17 +520,22 @@ PROCEDURE ProcessForm :
             APPLY "ENTRY":U TO SalesRep IN FRAME {&FRAME-NAME}.    
             RETURN.
         END.
-        
+        IF NOT lEmailCheck THEN
+        DO:
+            MESSAGE "Emailadres klopt niet!" 
+                VIEW-AS ALERT-BOX.
+            APPLY "ENTRY":U TO ttCustomerUpd.EmailAddress IN FRAME {&FRAME-NAME}.    
+            RETURN. 
+        END.
         ELSE DO:
-            MESSAGE "Are you sure you want to save this record?" 
+            MESSAGE "Weet u dat zeker?" 
             VIEW-AS ALERT-BOX BUTTONS YES-NO UPDATE lAnswer.
             
          IF lAnswer THEN
          DO:
             ASSIGN {&DISPLAYED-FIELDS}.
             RUN SaveCustRecord IN ghDataUtil (INPUT-OUTPUT TABLE ttCustomerUpd,
-                                              INPUT pcMode).                             
-                                    
+                                              INPUT pcMode).                                                           
             IF RETURN-VALUE <> "" THEN
             DO:
                MESSAGE RETURN-VALUE
@@ -488,17 +544,121 @@ PROCEDURE ProcessForm :
             END.
             APPLY "END-ERROR":U TO SELF. //SLUITEN NA HET OPLSLAAN
          END. 
-         ELSE DO:
+         ELSE DO: 
+            RETURN.
+           /*
             FIND FIRST ttCustomerUpd.
             IF pcMode = "New" THEN
                 DO:
                     pcMode = "Mod".
                 END.
-            END.
-        END.
-     END.
-     DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
+            */   
+         END.
+      END.
+   END.
+   DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
 END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+/* ************************  Function Implementations ***************** */
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION EmailValidation mainFrame 
+FUNCTION EmailValidation RETURNS LOGICAL
+  ( INPUT cEmail AS CHARACTER ) :
+/*------------------------------------------------------------------------------
+  Purpose:  
+    Notes:  
+------------------------------------------------------------------------------*/
+
+ DEFINE VARIABLE nChar    AS INTEGER.
+    DEFINE VARIABLE v-length AS INTEGER.
+    DEFINE VARIABLE v-left   AS CHARACTER FORMAT "x(50)" NO-UNDO .
+    DEFINE VARIABLE v-right  AS CHARACTER FORMAT "x(50)" NO-UNDO .
+    DEFINE VARIABLE v-at     AS INTEGER.
+    DEFINE VARIABLE v-dot    AS INTEGER.
+    cEmail = TRIM(cEmail).
+    v-length = LENGTH(cEmail).
+    IF v-length< 5 THEN // Moet minimaal zijn: X@X.X
+        RETURN FALSE.
+
+    v-at = INDEX(cEmail, "@").
+    v-left = SUBSTRING (cEmail, 1, (v-at - 1)).
+    v-right = SUBSTRING(cEmail, (v-at + 1), (v-length - (v-at ))).
+    v-dot = INDEX(v-right,".").
+    DISPLAY v-left.
+    DISPLAY v-right.
+
+    IF v-at = 0 OR v-dot = 0 OR length(v-left) = 0 OR length(v-right) = 0 THEN
+    DO:
+        RETURN FALSE.
+    END.
+
+
+    DO nChar = 1 TO LENGTH(v-left) :
+        IF INDEX("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_" , CAPS(SUBSTRING(v-left,nChar,1))) = 0 THEN
+        DO:
+            RETURN FALSE.
+        END.
+    END.
+    nChar = 0.
+    DO nChar = 1 TO LENGTH(v-right) :
+        IF INDEX("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-" , CAPS(SUBSTRING(v-right,nChar,1))) = 0 THEN
+        DO:
+            RETURN FALSE.
+        END.
+    END.
+
+    RETURN TRUE. // Function return value.
+
+END FUNCTION.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION NameValidation mainFrame 
+FUNCTION NameValidation RETURNS CHARACTER
+  ( INPUT cNaam AS CHARACTER ) :
+/*------------------------------------------------------------------------------
+  Purpose:  
+    Notes:  
+------------------------------------------------------------------------------*/
+    DEFINE VARIABLE iCount AS INTEGER NO-UNDO.
+    DEFINE VARIABLE cOutput AS CHARACTER NO-UNDO.
+
+    IF cNaam = "" THEN RETURN "" .
+
+    DO iCount = 1 TO NUM-ENTRIES(cNaam," "):
+    ASSIGN 
+        cOutput = cOutput +
+    CAPS(SUBSTRING(ENTRY(iCount,cNaam," "),1,1)) +
+        LC(SUBSTRING(ENTRY(iCount,cNaam," "),2,LENGTH(ENTRY(iCount,cNaam," ")))) + " " .
+    END.
+
+    RETURN cOutput.
+END FUNCTION.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION PostalcodeValidation mainFrame 
+FUNCTION PostalcodeValidation RETURNS CHARACTER
+  ( INPUT cPostalCode AS CHARACTER ) :
+/*------------------------------------------------------------------------------
+  Purpose:  
+    Notes:  
+------------------------------------------------------------------------------*/
+  DEFINE VARIABLE cOutput AS CHARACTER NO-UNDO.
+  DEFINE VARIABLE iCount AS INTEGER NO-UNDO.
+  
+  DO iCount = 1 TO NUM-ENTRIES(cPostalCode):
+    cOutput = SUBSTRING(ENTRY(iCount,cPostalCode),1,4) + " " + CAPS(SUBSTRING(ENTRY(iCount,cPostalCode),5,6)).
+  MESSAGE LENGTH(cPostalCode) VIEW-AS ALERT-BOX.
+  END.
+  RETURN cOutput.   /* Function return value. */
+
+END FUNCTION.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
