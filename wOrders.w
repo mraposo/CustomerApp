@@ -95,7 +95,7 @@ DEFINE BUTTON BtnDone DEFAULT
 
 DEFINE RECTANGLE RECT-15
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 94 BY 14.05.
+     SIZE 84 BY 14.05.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -114,14 +114,14 @@ DEFINE BROWSE brOrders
       Order.Carrier FORMAT "x(25)":U
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-    WITH NO-ROW-MARKERS SEPARATORS SIZE 90 BY 10.95 ROW-HEIGHT-CHARS .62 FIT-LAST-COLUMN.
+    WITH NO-ROW-MARKERS SEPARATORS SIZE 80 BY 10.95 ROW-HEIGHT-CHARS .57 FIT-LAST-COLUMN.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
      brOrders AT ROW 2.43 COL 5 WIDGET-ID 200
-     BtnDone AT ROW 13.86 COL 79 WIDGET-ID 2
+     BtnDone AT ROW 13.86 COL 68 WIDGET-ID 2
      "Orders" VIEW-AS TEXT
           SIZE 8 BY .95 AT ROW 1 COL 10 WIDGET-ID 6
           FGCOLOR 9 FONT 6
@@ -129,7 +129,7 @@ DEFINE FRAME DEFAULT-FRAME
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 97.6 BY 14.91
+         SIZE 87.2 BY 14.91
          DEFAULT-BUTTON BtnDone WIDGET-ID 100.
 
 
@@ -149,9 +149,9 @@ DEFINE FRAME DEFAULT-FRAME
 IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
-         TITLE              = "Orders"
+         TITLE              = "<insert window title>"
          HEIGHT             = 14.91
-         WIDTH              = 97.6
+         WIDTH              = 87.2
          MAX-HEIGHT         = 16.19
          MAX-WIDTH          = 109.6
          VIRTUAL-HEIGHT     = 16.19
@@ -212,7 +212,7 @@ THEN C-Win:HIDDEN = no.
 
 &Scoped-define SELF-NAME C-Win
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
-ON END-ERROR OF C-Win /* Orders */
+ON END-ERROR OF C-Win /* <insert window title> */
 OR ENDKEY OF {&WINDOW-NAME} ANYWHERE DO:
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
@@ -225,7 +225,7 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
-ON WINDOW-CLOSE OF C-Win /* Orders */
+ON WINDOW-CLOSE OF C-Win /* <insert window title> */
 DO:
   /* This event will close the window and terminate the procedure.  */
   APPLY "CLOSE":U TO THIS-PROCEDURE.
@@ -275,6 +275,7 @@ MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
    SUBSCRIBE TO "fetchOrders" ANYWHERE.
+   SUBSCRIBE TO "CloseWindow" ANYWHERE.
   RUN enable_UI.
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
    WAIT-FOR CLOSE OF THIS-PROCEDURE.
