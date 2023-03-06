@@ -39,7 +39,7 @@
 &Scoped-define PROCEDURE-TYPE Dialog-Box
 &Scoped-define DB-AWARE no
 
-/* Name of designated FRAME-NAME and/or first browse and/or first query */
+/* Name of first Frame and/or Browse and/or first Query                 */
 &Scoped-define FRAME-NAME Dialog-Frame
 
 /* Standard List Definitions                                            */
@@ -60,19 +60,19 @@
 /* Definitions of the field level widgets                               */
 DEFINE IMAGE IMAGE-1
      FILENAME "adeicon/croplogo.jpg":U
-     SIZE 28 BY 3.03.
+     SIZE 45 BY 4.29.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME Dialog-Frame
-     "Version 1.1  (BETA)" VIEW-AS TEXT
-          SIZE 23 BY .94 AT ROW 7.19 COL 17 WIDGET-ID 4
+     "Version 1.0  (BETA)" VIEW-AS TEXT
+          SIZE 23 BY .95 AT ROW 7.19 COL 17 WIDGET-ID 4
           FONT 6
      "Made by:  Mario Raposo" VIEW-AS TEXT
-          SIZE 25 BY 1.19 AT ROW 8.88 COL 16 WIDGET-ID 6
-     IMAGE-1 AT ROW 2.75 COL 15 WIDGET-ID 2
-     SPACE(13.39) SKIP(4.88)
+          SIZE 25 BY 1.19 AT ROW 8.86 COL 16 WIDGET-ID 6
+     IMAGE-1 AT ROW 1.71 COL 7 WIDGET-ID 2
+     SPACE(4.39) SKIP(4.66)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
          TITLE "Version 1.0" WIDGET-ID 100.
@@ -94,7 +94,7 @@ DEFINE FRAME Dialog-Frame
 
 &ANALYZE-SUSPEND _RUN-TIME-ATTRIBUTES
 /* SETTINGS FOR DIALOG-BOX Dialog-Frame
-   FRAME-NAME                                                           */
+                                                                        */
 ASSIGN 
        FRAME Dialog-Frame:SCROLLABLE       = FALSE
        FRAME Dialog-Frame:HIDDEN           = TRUE.

@@ -480,7 +480,8 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
   RUN InitializeObjects.
   RUN enable_UI .
-  SUBSCRIBE TO "FindCustomer" IN SOURCE-PROCEDURE.
+    SUBSCRIBE TO "FindCustomer"  IN SOURCE-PROCEDURE.
+    SUBSCRIBE TO "ButtonsSwitch" IN SOURCE-PROCEDURE.
   SUBSCRIBE TO "CloseWindow" ANYWHERE.
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
     WAIT-FOR CLOSE OF THIS-PROCEDURE.
@@ -491,6 +492,30 @@ END.
 
 
 /* **********************  Internal Procedures  *********************** */
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ButtonsSwitch C-Win
+PROCEDURE ButtonsSwitch:
+/*------------------------------------------------------------------------------
+ Purpose: Turns off the navigation buttons on the first and last customer.
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE INPUT PARAMETER cValue AS CHARACTER NO-UNDO.
+  
+  CASE cValue:
+      WHEN "FirstOff" THEN lFirstNavButtons = NO.  
+      WHEN "FirstOn" THEN  lFirstNavButtons = YES.    
+      WHEN "LastOff" THEN lLastNavButtons = NO.
+      WHEN "LastOn" THEN  lLastNavButtons = YES.    
+      
+  END CASE.
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE CloseWindow C-Win 
 PROCEDURE CloseWindow :
@@ -573,6 +598,9 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
+
+
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE InitializeObjects C-Win 
 PROCEDURE InitializeObjects :
 /*------------------------------------------------------------------------------
@@ -598,6 +626,15 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+
+
+
+
+
+
+
+
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetButtons C-Win 
 PROCEDURE SetButtons :
@@ -635,6 +672,8 @@ IF lLastNavButtons THEN
         WITH FRAME {&FRAME-NAME}.
   
  END.
+   
+
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

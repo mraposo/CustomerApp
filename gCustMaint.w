@@ -201,7 +201,7 @@ DEFINE FRAME mainFrame
           DROP-DOWN-LIST
           SIZE 29 BY 1
      btnSave AT ROW 2.5 COL 96 WIDGET-ID 30
-     Btn_Cancel AT ROW 3.75 COL 96
+     Btn_Cancel AT ROW 3.5 COL 96
      ttCustomerUpd.CustNum AT ROW 3 COL 12.25 WIDGET-ID 10
           VIEW-AS FILL-IN 
           SIZE 9 BY 1
@@ -327,8 +327,7 @@ END.
 ON LEAVE OF ttCustomerUpd.PostalCode IN FRAME mainFrame /* Postal Code */
 DO:
   IF ttCustomerUpd.Country:INPUT-VALUE = "NL" OR  
-     ttCustomerUpd.Country:INPUT-VALUE = "Nederland" OR
-     ttCustomerUpd.Country:INPUT-VALUE = "Netherlands" THEN
+     ttCustomerUpd.Country:INPUT-VALUE = "Nederland" THEN
   DO:
      ttCustomerUpd.PostalCode:SCREEN-VALUE = PostalcodeValidation(ttCustomerUpd.PostalCode:INPUT-VALUE).
   END.
@@ -573,7 +572,7 @@ FUNCTION EmailValidation RETURNS LOGICAL
     Notes:  
 ------------------------------------------------------------------------------*/
 
-    DEFINE VARIABLE nChar    AS INTEGER.
+ DEFINE VARIABLE nChar    AS INTEGER.
     DEFINE VARIABLE v-length AS INTEGER.
     DEFINE VARIABLE v-left   AS CHARACTER FORMAT "x(50)" NO-UNDO .
     DEFINE VARIABLE v-right  AS CHARACTER FORMAT "x(50)" NO-UNDO .
@@ -581,16 +580,15 @@ FUNCTION EmailValidation RETURNS LOGICAL
     DEFINE VARIABLE v-dot    AS INTEGER.
     cEmail = TRIM(cEmail).
     v-length = LENGTH(cEmail).
-    IF v-length< 5 THEN // Moet minimaal zijn:  X@X.X
+    IF v-length< 5 THEN // Moet minimaal zijn: X@X.X
         RETURN FALSE.
 
     v-at = INDEX(cEmail, "@").
     v-left = SUBSTRING (cEmail, 1, (v-at - 1)).
     v-right = SUBSTRING(cEmail, (v-at + 1), (v-length - (v-at ))).
     v-dot = INDEX(v-right,".").
-    
-    //DISPLAY v-left.
-    //DISPLAY v-right.
+    DISPLAY v-left.
+    DISPLAY v-right.
 
     IF v-at = 0 OR v-dot = 0 OR length(v-left) = 0 OR length(v-right) = 0 THEN
     DO:
@@ -653,29 +651,24 @@ FUNCTION PostalcodeValidation RETURNS CHARACTER
 ------------------------------------------------------------------------------*/
   DEFINE VARIABLE cOutput AS CHARACTER NO-UNDO.
   DEFINE VARIABLE iCount AS INTEGER NO-UNDO.
-  //DEFINE VARIABLE cUnwantedChars AS CHARACTER NO-UNDO INITIAL "!@#$%^&*()_+`-={}|[]\:;""'<>,.?/".
   
-  DO iCount = 1 TO NUM-ENTRIES(cPostalCode):
-    //cOutput = REPLACE(cOutput, cUnwantedChars, "").
-    cOutput = SUBSTRING(ENTRY(iCount,cPostalCode),1,4) + 
-              CAPS(SUBSTRING(ENTRY(iCount,cPostalCode),5,6)).
+    DO iCount = 1 TO NUM-ENTRIES(cPostalCode):
+       cOutput = SUBSTRING(ENTRY(iCount,cPostalCode),1,4) + 
+            CAPS(SUBSTRING(ENTRY(iCount,cPostalCode),5,6)).
     
-    cOutput = REPLACE(
-              REPLACE(
-              REPLACE(
-              REPLACE(
-              REPLACE(
-              REPLACE(
-              REPLACE(
-              REPLACE(
-              REPLACE(cOutput, ",", ""), ".", ""), "-", ""), ";", ""), "=", ""), "+", ""), "_", ""), " ", ""), "?", "").
+  cOutput = REPLACE(
+            REPLACE(
+            REPLACE(
+            REPLACE(
+            REPLACE(
+            REPLACE(
+            REPLACE(
+            REPLACE(
+            REPLACE(cOutput, ",", ""), ".", ""), "-", ""), ";", ""), "=", ""), "+", ""), "_", ""), " ", ""), "?", "").
              
-     //cOutput = RIGHT-TRIM(cOutput, "-").
-     cOutput = SUBSTRING(cOutput, 1, 6).         
-  //cOutput = TRIM(cOutput, ",.;:!?~'[]()").          
-  //MESSAGE LENGTH(cPostalCode) VIEW-AS ALERT-BOX.
-  END.
-  RETURN cOutput.   /* Function return value. */
+        cOutput = SUBSTRING(cOutput, 1, 6).         
+    END.
+    RETURN cOutput.   /* Function return value. */
 
 END FUNCTION.
 
