@@ -148,15 +148,15 @@ DEFINE MENU POPUP-MENU-brCustomers
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON btnOrders 
      LABEL "Orders" 
-     SIZE 15 BY 1.14.
+     SIZE 15 BY 1.13.
 
 DEFINE VARIABLE fiComments AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
-     SIZE 51 BY 1 NO-UNDO.
+     SIZE 50 BY 1 NO-UNDO.
 
 DEFINE VARIABLE fiCustName AS CHARACTER FORMAT "X(256)":U 
      VIEW-AS FILL-IN 
-     SIZE 35 BY 1 NO-UNDO.
+     SIZE 36 BY 1 NO-UNDO.
 
 DEFINE VARIABLE fiCustNum AS INTEGER FORMAT "->,>>>>>9":U INITIAL 0 
      VIEW-AS FILL-IN 
@@ -188,25 +188,25 @@ DEFINE QUERY brCustomers FOR
 DEFINE BROWSE brCustomers
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS brCustomers PDC-Win _STRUCTURED
   QUERY brCustomers NO-LOCK DISPLAY
-      ttCustomers.CustNum FORMAT ">>>>9":U WIDTH 12.2
-      ttCustomers.Name FORMAT "x(30)":U WIDTH 34.2
-      ttCustomers.Comments FORMAT "x(80)":U
+      ttCustomers.CustNum FORMAT ">>>>9":U WIDTH 12.25
+      ttCustomers.Name FORMAT "x(30)":U WIDTH 35.75
+      ttCustomers.Comments FORMAT "x(80)":U WIDTH 46
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-    WITH NO-ROW-MARKERS SEPARATORS SIZE 99 BY 11.43 ROW-HEIGHT-CHARS .67 FIT-LAST-COLUMN.
+    WITH NO-ROW-MARKERS SEPARATORS SIZE 99 BY 11.44 ROW-HEIGHT-CHARS .67 FIT-LAST-COLUMN.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     brCustomers AT ROW 1.48 COL 5 WIDGET-ID 200
+     brCustomers AT ROW 1.47 COL 5 WIDGET-ID 200
      fiCustNum AT ROW 12.91 COL 3 COLON-ALIGNED NO-LABEL WIDGET-ID 14
      fiCustName AT ROW 12.91 COL 16 COLON-ALIGNED NO-LABEL WIDGET-ID 10
-     fiComments AT ROW 12.91 COL 51 COLON-ALIGNED NO-LABEL WIDGET-ID 12
-     fiSalesRep AT ROW 14.57 COL 15 COLON-ALIGNED WIDGET-ID 26
-     btnOrders AT ROW 15.29 COL 88 WIDGET-ID 8
-     fiOrders AT ROW 15.52 COL 15 COLON-ALIGNED WIDGET-ID 28
-     RECT-21 AT ROW 14.33 COL 5 WIDGET-ID 40
+     fiComments AT ROW 12.91 COL 52 COLON-ALIGNED NO-LABEL WIDGET-ID 12
+     fiSalesRep AT ROW 14.56 COL 15 COLON-ALIGNED WIDGET-ID 26
+     btnOrders AT ROW 15.28 COL 88 WIDGET-ID 8
+     fiOrders AT ROW 15.53 COL 15 COLON-ALIGNED WIDGET-ID 28
+     RECT-21 AT ROW 14.34 COL 5 WIDGET-ID 40
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -241,10 +241,10 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          HIDDEN             = YES
          TITLE              = "Customers"
          HEIGHT             = 16.38
-         WIDTH              = 106.8
-         MAX-HEIGHT         = 39.67
+         WIDTH              = 107.38
+         MAX-HEIGHT         = 39.66
          MAX-WIDTH          = 156
-         VIRTUAL-HEIGHT     = 39.67
+         VIRTUAL-HEIGHT     = 39.66
          VIRTUAL-WIDTH      = 156
          RESIZE             = YES
          SCROLL-BARS        = NO
@@ -293,10 +293,11 @@ THEN PDC-Win:HIDDEN = NO.
      _TblList          = "Temp-Tables.ttCustomers"
      _Options          = "NO-LOCK"
      _FldNameList[1]   > Temp-Tables.ttCustomers.CustNum
-"ttCustomers.CustNum" ? ? "integer" ? ? ? ? ? ? no ? no no "12.2" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"CustNum" ? ? "integer" ? ? ? ? ? ? no ? no no "12.25" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[2]   > Temp-Tables.ttCustomers.Name
-"ttCustomers.Name" ? ? "character" ? ? ? ? ? ? no ? no no "34.2" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[3]   = Temp-Tables.ttCustomers.Comments
+"Name" ? ? "character" ? ? ? ? ? ? no ? no no "35.75" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[3]   > Temp-Tables.ttCustomers.Comments
+"Comments" ? ? "character" ? ? ? ? ? ? no ? no no "46" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _Query            is OPENED
 */  /* BROWSE brCustomers */
 &ANALYZE-RESUME
@@ -672,28 +673,29 @@ PROCEDURE CustBrowseNavigation :
   DEFINE INPUT PARAMETER pcCustChanged AS CHARACTER NO-UNDO.
   
   CASE pcCustChanged:
-  WHEN "First" THEN
-  DO:
-    GET FIRST brCustomers NO-LOCK.
-    IF AVAILABLE ttCustomers THEN
+    WHEN "First" THEN
+     DO:
+        GET FIRST brCustomers NO-LOCK.
+        IF AVAILABLE ttCustomers THEN
         REPOSITION brCustomers TO ROWID ROWID(ttCustomers).
-  END.
-  WHEN "Prev" THEN
-  DO:
-    BROWSE brCustomers:SELECT-PREV-ROW() NO-ERROR.
-  END.
-  WHEN "Next" THEN
-  DO:
-    BROWSE brCustomers:SELECT-NEXT-ROW() NO-ERROR.
-  END.
-  WHEN "Last" THEN
-  DO:
-    GET LAST brCustomers NO-LOCK.
-    IF AVAILABLE ttCustomers THEN
+     END.
+    WHEN "Prev" THEN
+     DO:
+        BROWSE brCustomers:SELECT-PREV-ROW() NO-ERROR.
+     END.
+    WHEN "Next" THEN
+     DO:
+        BROWSE brCustomers:SELECT-NEXT-ROW() NO-ERROR.
+     END.
+    WHEN "Last" THEN
+     DO:
+        GET LAST brCustomers NO-LOCK.
+        IF AVAILABLE ttCustomers THEN
         brCustomers:SET-REPOSITIONED-ROW(13) IN FRAME {&FRAME-NAME}.
         REPOSITION brCustomers TO ROWID ROWID(ttCustomers).
-  END.
- END CASE.
+     END.
+    END CASE.
+    
  APPLY "VALUE-CHANGED" TO brCustomers IN FRAME {&FRAME-NAME}.
 END PROCEDURE.
 

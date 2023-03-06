@@ -166,11 +166,11 @@ DEFINE FRAME mainFrame
           VIEW-AS FILL-IN 
           SIZE 38 BY 1
           BGCOLOR 14 
-     ttCustomerUpd.Address AT ROW 6 COL 13.62 WIDGET-ID 2
+     ttCustomerUpd.Address AT ROW 5 COL 13.62 WIDGET-ID 2
           VIEW-AS FILL-IN 
           SIZE 38 BY 1
           BGCOLOR 14 
-     ttCustomerUpd.Address2 AT ROW 5 COL 12.5 WIDGET-ID 4
+     ttCustomerUpd.Address2 AT ROW 6 COL 12.5 WIDGET-ID 4
           VIEW-AS FILL-IN 
           SIZE 38 BY 1
      ttCustomerUpd.City AT ROW 7 COL 17.75 WIDGET-ID 6
@@ -201,7 +201,7 @@ DEFINE FRAME mainFrame
           DROP-DOWN-LIST
           SIZE 29 BY 1
      btnSave AT ROW 2.5 COL 96 WIDGET-ID 30
-     Btn_Cancel AT ROW 3.5 COL 96
+     Btn_Cancel AT ROW 3.75 COL 96
      ttCustomerUpd.CustNum AT ROW 3 COL 12.25 WIDGET-ID 10
           VIEW-AS FILL-IN 
           SIZE 9 BY 1

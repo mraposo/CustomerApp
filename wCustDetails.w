@@ -635,8 +635,6 @@ IF lLastNavButtons THEN
         WITH FRAME {&FRAME-NAME}.
   
  END.
-   
-
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
