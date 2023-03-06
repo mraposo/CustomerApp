@@ -52,7 +52,6 @@ CREATE WIDGET-POOL.
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
-DEFINE VARIABLE giCustNum AS INTEGER NO-UNDO.
 DEFINE VARIABLE ghProcLib AS HANDLE NO-UNDO.
 DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
 
@@ -363,8 +362,8 @@ DO:
       DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
       PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "First").
       PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).  //updates the Order Window
+      
       RUN SetWindowName(ttCustomers.NAME).
-      giCustNum = ttCustomers.CustNum.
       RUN SetButtons.
 END.
 
@@ -380,8 +379,8 @@ DO:
       DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
       PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Last").
       PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).
+      
       RUN SetWindowName(ttCustomers.NAME).
-      giCustNum = ttCustomers.CustNum.
       RUN SetButtons.
 END.
 
@@ -412,7 +411,6 @@ DO:
   PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Next").
   PUBLISH "fetchOrders":U(ttCustomers.CustNum,Customer.NAME).
   RUN SetWindowName(ttCustomers.NAME).
-  giCustNum = ttCustomers.CustNum.
   RUN SetButtons.
 END.
 
@@ -431,8 +429,8 @@ DO:
      END.
     PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Prev").
     PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).
+    
     RUN SetWindowName(ttCustomers.NAME).
-    giCustNum = ttCustomers.CustNum.
     RUN SetButtons.
 END.
 
@@ -550,10 +548,9 @@ PROCEDURE FindCustomer :
 ------------------------------------------------------------------------------*/
    DEFINE INPUT PARAMETER piCustNum AS INTEGER NO-UNDO.
       
-   FIND FIRST ttCustomers WHERE ttCustomers.CustNum = piCustNum.
+   FIND FIRST ttCustomers WHERE ttCustomers.CustNum = piCustNum NO-LOCK.
    DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
    {&window-name}:TITLE = 'Customer: ' + ttCustomers.NAME.
-   giCustNum = piCustNum.
    
    RUN SetButtons.
 END PROCEDURE.
