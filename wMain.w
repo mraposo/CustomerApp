@@ -53,6 +53,7 @@ DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
 
 DEFINE VARIABLE hDetails      AS HANDLE NO-UNDO.
 DEFINE VARIABLE hOrders       AS HANDLE NO-UNDO.
+DEFINE VARIABLE hBrowse       AS HANDLE NO-UNDO. // to check first of browse
 DEFINE VARIABLE glResponse    AS LOGICAL NO-UNDO.
 DEFINE VARIABLE gcWhereClause AS CHARACTER  NO-UNDO.
 DEFINE VARIABLE gcSortClause  AS CHARACTER  NO-UNDO.
@@ -245,15 +246,15 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MAX-WIDTH          = 156
          VIRTUAL-HEIGHT     = 39.67
          VIRTUAL-WIDTH      = 156
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 
 ASSIGN {&WINDOW-NAME}:MENUBAR    = MENU MENU-BAR-PDC-Win:HANDLE.
@@ -279,7 +280,7 @@ ASSIGN
 /* SETTINGS FOR FILL-IN fiSalesRep IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(PDC-Win)
-THEN PDC-Win:HIDDEN = no.
+THEN PDC-Win:HIDDEN = NO.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -362,11 +363,24 @@ DO:
   DEFINE VARIABLE hSortColumn  AS WIDGET-HANDLE.
   DEFINE VARIABLE hQueryHandle AS HANDLE NO-UNDO.
 
+  DEFINE VARIABLE iCount AS INTEGER.
+  DEFINE VARIABLE iRowNumber AS INTEGER.
+  DEFINE VARIABLE rowRowId AS ROWID.
+  
+  rowRowId = ROWID(ttCustomers).
+  DO iCount = 1 TO brCustomers:NUM-ITERATIONS:
+    IF brCustomers:IS-ROW-SELECTED(iCount) THEN LEAVE. 
+  END.
+  
   hSortColumn = BROWSE brCustomers:CURRENT-COLUMN.
   hQueryHandle = BROWSE brCustomers:QUERY.
   hQueryHandle:QUERY-CLOSE().
   hQueryHandle:QUERY-PREPARE("FOR EACH ttCustomers NO-LOCK BY " + hSortColumn:NAME).
   hQueryHandle:QUERY-OPEN().
+  
+  brCustomers:SET-REPOSITIONED-ROW(iCount,"ALWAYS").
+  REPOSITION brCustomers TO ROWID rowRowId.
+  iRowNumber = brCustomers:GET-REPOSITIONED-ROW().
   
   APPLY "VALUE-CHANGED" TO brCustomers.
 END.
@@ -389,7 +403,7 @@ DO:
     END.
   
     DISPLAY fiSalesRep fiOrders WITH FRAME {&FRAME-NAME}. 
-  
+ 
     PUBLISH "fetchOrders"(ttCustomers.CustNum,ttCustomers.NAME).
     PUBLISH "FindCustomer"(ttCustomers.CustNum).
 END.
@@ -650,8 +664,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE CustBrowseNavigation PDC-Win 
 PROCEDURE CustBrowseNavigation :
 /*------------------------------------------------------------------------------
-  Purpose: Repositions the browse whith nav buttons 
-            on the wCustDetails.w window   
+  Purpose: Repositions the browse with nav buttons on the wCustDetails.w window            
   Parameters:  
   Notes:       
 ------------------------------------------------------------------------------*/
@@ -664,7 +677,6 @@ PROCEDURE CustBrowseNavigation :
     GET FIRST brCustomers NO-LOCK.
     IF AVAILABLE ttCustomers THEN
         REPOSITION brCustomers TO ROWID ROWID(ttCustomers).
-        //Publish "SetButtons".
   END.
   WHEN "Prev" THEN
   DO:
@@ -678,8 +690,8 @@ PROCEDURE CustBrowseNavigation :
   DO:
     GET LAST brCustomers NO-LOCK.
     IF AVAILABLE ttCustomers THEN
+        brCustomers:SET-REPOSITIONED-ROW(13) IN FRAME {&FRAME-NAME}.
         REPOSITION brCustomers TO ROWID ROWID(ttCustomers).
-        //PUBLISH "Setbuttons".
   END.
  END CASE.
  APPLY "VALUE-CHANGED" TO brCustomers IN FRAME {&FRAME-NAME}.
@@ -695,7 +707,7 @@ PROCEDURE DelCustomer :
   Parameters:  
   Notes:       
 ------------------------------------------------------------------------------*/
-   MESSAGE "Are you sure you want to delete this Customer record?"
+   MESSAGE "Wilt u" ttCustomers.Name "verwijderen?"
    VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE glResponse.
 
  IF glResponse THEN

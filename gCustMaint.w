@@ -142,16 +142,16 @@ FUNCTION PostalcodeValidation RETURNS CHARACTER
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON btnSave 
      LABEL "Save" 
-     SIZE 15 BY 1.14.
+     SIZE 15 BY 1.13.
 
 DEFINE BUTTON Btn_Cancel AUTO-END-KEY 
      LABEL "Cancel" 
-     SIZE 15 BY 1.14
+     SIZE 15 BY 1.13
      BGCOLOR 8 .
 
 DEFINE RECTANGLE RECT-19
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 109 BY 12.62.
+     SIZE 111 BY 13.25.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -162,54 +162,54 @@ DEFINE QUERY mainFrame FOR
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME mainFrame
-     ttCustomerUpd.Name AT ROW 3.38 COL 16.2 WIDGET-ID 14
+     ttCustomerUpd.Name AT ROW 4 COL 15.75 WIDGET-ID 14
           VIEW-AS FILL-IN 
           SIZE 38 BY 1
           BGCOLOR 14 
-     ttCustomerUpd.Address AT ROW 4.33 COL 14.2 WIDGET-ID 2
+     ttCustomerUpd.Address AT ROW 6 COL 13.62 WIDGET-ID 2
           VIEW-AS FILL-IN 
           SIZE 38 BY 1
           BGCOLOR 14 
-     ttCustomerUpd.Address2 AT ROW 5.29 COL 13 WIDGET-ID 4
+     ttCustomerUpd.Address2 AT ROW 5 COL 12.5 WIDGET-ID 4
           VIEW-AS FILL-IN 
           SIZE 38 BY 1
-     ttCustomerUpd.City AT ROW 6.24 COL 18.4 WIDGET-ID 6
+     ttCustomerUpd.City AT ROW 7 COL 17.75 WIDGET-ID 6
           VIEW-AS FILL-IN 
           SIZE 27 BY 1
           BGCOLOR 14 
-     ttCustomerUpd.State AT ROW 7.19 COL 16.8 WIDGET-ID 22
+     ttCustomerUpd.State AT ROW 8 COL 16.12 WIDGET-ID 22
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
-     ttCustomerUpd.Country AT ROW 8.14 COL 14.6 WIDGET-ID 8
-          VIEW-AS FILL-IN 
-          SIZE 22 BY 1
-          BGCOLOR 14 
-     ttCustomerUpd.PostalCode AT ROW 9.1 COL 10.4 WIDGET-ID 18
+     ttCustomerUpd.Country AT ROW 9 COL 14.12 WIDGET-ID 8
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
           BGCOLOR 14 
-     ttCustomerUpd.Phone AT ROW 10.05 COL 15.6 WIDGET-ID 16
+     ttCustomerUpd.PostalCode AT ROW 10 COL 10.25 WIDGET-ID 18
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
-     ttCustomerUpd.EmailAddress AT ROW 11 COL 16.8 WIDGET-ID 12
+          BGCOLOR 14 
+     ttCustomerUpd.Phone AT ROW 11 COL 15.25 WIDGET-ID 16
+          VIEW-AS FILL-IN 
+          SIZE 22 BY 1
+     ttCustomerUpd.EmailAddress AT ROW 12 COL 16.12 WIDGET-ID 12
           VIEW-AS FILL-IN 
           SIZE 38 BY 1
           BGCOLOR 14 
-     ttCustomerUpd.SalesRep AT ROW 11.95 COL 21 COLON-ALIGNED WIDGET-ID 24
+     ttCustomerUpd.SalesRep AT ROW 13 COL 20 COLON-ALIGNED WIDGET-ID 24
           VIEW-AS COMBO-BOX INNER-LINES 5
           LIST-ITEM-PAIRS "None","None"
           DROP-DOWN-LIST
           SIZE 29 BY 1
-     btnSave AT ROW 1.95 COL 96 WIDGET-ID 30
-     Btn_Cancel AT ROW 3.38 COL 96
-     ttCustomerUpd.CustNum AT ROW 2.43 COL 12.4 WIDGET-ID 10
+     btnSave AT ROW 2.5 COL 96 WIDGET-ID 30
+     Btn_Cancel AT ROW 3.5 COL 96
+     ttCustomerUpd.CustNum AT ROW 3 COL 12.25 WIDGET-ID 10
           VIEW-AS FILL-IN 
           SIZE 9 BY 1
      "Customer" VIEW-AS TEXT
-          SIZE 11 BY .62 AT ROW 1.24 COL 12 WIDGET-ID 28
+          SIZE 10 BY .63 AT ROW 1.5 COL 8 WIDGET-ID 28
           FGCOLOR 1 FONT 6
-     RECT-19 AT ROW 1.48 COL 5 WIDGET-ID 26
-     SPACE(2.39) SKIP(0.65)
+     RECT-19 AT ROW 1.75 COL 3 WIDGET-ID 26
+     SPACE(1.99) SKIP(0.18)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
          TITLE "Customer Maintenance"
@@ -513,19 +513,19 @@ PROCEDURE ProcessForm :
             APPLY "ENTRY":U TO ttCustomerUpd.EmailAddress IN FRAME {&FRAME-NAME}.    
             RETURN.
         END.
-        IF SalesRep:INPUT-VALUE = "" THEN
-        DO:
-            MESSAGE "SalesRep vergeten in te vullen!" 
-                VIEW-AS ALERT-BOX.
-            APPLY "ENTRY":U TO SalesRep IN FRAME {&FRAME-NAME}.    
-            RETURN.
-        END.
         IF NOT lEmailCheck THEN
         DO:
             MESSAGE "Emailadres klopt niet!" 
                 VIEW-AS ALERT-BOX.
             APPLY "ENTRY":U TO ttCustomerUpd.EmailAddress IN FRAME {&FRAME-NAME}.    
             RETURN. 
+        END. 
+        IF SalesRep:INPUT-VALUE = "" THEN
+        DO:
+            MESSAGE "SalesRep vergeten in te vullen!" 
+                VIEW-AS ALERT-BOX.
+            APPLY "ENTRY":U TO SalesRep IN FRAME {&FRAME-NAME}.    
+            RETURN.
         END.
         ELSE DO:
             MESSAGE "Weet u dat zeker?" 
