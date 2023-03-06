@@ -53,10 +53,7 @@ DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
 
 DEFINE VARIABLE hDetails      AS HANDLE NO-UNDO.
 DEFINE VARIABLE hOrders       AS HANDLE NO-UNDO.
-DEFINE VARIABLE hBrowse       AS HANDLE NO-UNDO. // to check first of browse
 DEFINE VARIABLE glResponse    AS LOGICAL NO-UNDO.
-DEFINE VARIABLE gcWhereClause AS CHARACTER  NO-UNDO.
-DEFINE VARIABLE gcSortClause  AS CHARACTER  NO-UNDO.
 
 DEFINE TEMP-TABLE ttCustomerUpd NO-UNDO LIKE ttCustomers.
 
@@ -123,21 +120,12 @@ DEFINE SUB-MENU m_Navigation
        MENU-ITEM m_First        LABEL "First"         
        MENU-ITEM m_Last         LABEL "Last"          .
 
-DEFINE SUB-MENU m_Sort_By 
-       MENU-ITEM m_Cust_Num     LABEL "Cust Num"      
-       MENU-ITEM m_Name         LABEL "Name"          
-       MENU-ITEM m_Contact      LABEL "Comments"      .
-
-DEFINE SUB-MENU m_Action 
-       SUB-MENU  m_Sort_By      LABEL "Sort By"       .
-
 DEFINE SUB-MENU m_Help 
        MENU-ITEM m_Version      LABEL "Version"       .
 
 DEFINE MENU MENU-BAR-PDC-Win MENUBAR
        SUB-MENU  m_File         LABEL "File"          
        SUB-MENU  m_Navigation   LABEL "Navigation"    
-       SUB-MENU  m_Action       LABEL "Action"        
        SUB-MENU  m_Help         LABEL "Help"          .
 
 DEFINE MENU POPUP-MENU-brCustomers 
@@ -190,7 +178,7 @@ DEFINE BROWSE brCustomers
   QUERY brCustomers NO-LOCK DISPLAY
       ttCustomers.CustNum FORMAT ">>>>9":U WIDTH 12.25
       ttCustomers.Name FORMAT "x(30)":U WIDTH 35.75
-      ttCustomers.Comments FORMAT "x(80)":U WIDTH 46
+      ttCustomers.Comments FORMAT "x(80)":U
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
     WITH NO-ROW-MARKERS SEPARATORS SIZE 99 BY 11.44 ROW-HEIGHT-CHARS .67 FIT-LAST-COLUMN.
@@ -241,20 +229,20 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          HIDDEN             = YES
          TITLE              = "Customers"
          HEIGHT             = 16.38
-         WIDTH              = 107.38
+         WIDTH              = 106.13
          MAX-HEIGHT         = 39.66
          MAX-WIDTH          = 156
          VIRTUAL-HEIGHT     = 39.66
          VIRTUAL-WIDTH      = 156
-         RESIZE             = YES
-         SCROLL-BARS        = NO
-         STATUS-AREA        = NO
+         RESIZE             = yes
+         SCROLL-BARS        = no
+         STATUS-AREA        = no
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = YES
-         THREE-D            = YES
-         MESSAGE-AREA       = NO
-         SENSITIVE          = YES.
+         KEEP-FRAME-Z-ORDER = yes
+         THREE-D            = yes
+         MESSAGE-AREA       = no
+         SENSITIVE          = yes.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 
 ASSIGN {&WINDOW-NAME}:MENUBAR    = MENU MENU-BAR-PDC-Win:HANDLE.
@@ -280,7 +268,7 @@ ASSIGN
 /* SETTINGS FOR FILL-IN fiSalesRep IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(PDC-Win)
-THEN PDC-Win:HIDDEN = NO.
+THEN PDC-Win:HIDDEN = no.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -293,11 +281,10 @@ THEN PDC-Win:HIDDEN = NO.
      _TblList          = "Temp-Tables.ttCustomers"
      _Options          = "NO-LOCK"
      _FldNameList[1]   > Temp-Tables.ttCustomers.CustNum
-"CustNum" ? ? "integer" ? ? ? ? ? ? no ? no no "12.25" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"ttCustomers.CustNum" ? ? "integer" ? ? ? ? ? ? no ? no no "12.25" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[2]   > Temp-Tables.ttCustomers.Name
-"Name" ? ? "character" ? ? ? ? ? ? no ? no no "35.75" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[3]   > Temp-Tables.ttCustomers.Comments
-"Comments" ? ? "character" ? ? ? ? ? ? no ? no no "46" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"ttCustomers.Name" ? ? "character" ? ? ? ? ? ? no ? no no "35.75" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[3]   = Temp-Tables.ttCustomers.Comments
      _Query            is OPENED
 */  /* BROWSE brCustomers */
 &ANALYZE-RESUME
@@ -361,11 +348,10 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brCustomers PDC-Win
 ON START-SEARCH OF brCustomers IN FRAME DEFAULT-FRAME
 DO:
+  
   DEFINE VARIABLE hSortColumn  AS WIDGET-HANDLE.
   DEFINE VARIABLE hQueryHandle AS HANDLE NO-UNDO.
-
   DEFINE VARIABLE iCount AS INTEGER.
-  DEFINE VARIABLE iRowNumber AS INTEGER.
   DEFINE VARIABLE rowRowId AS ROWID.
   
   rowRowId = ROWID(ttCustomers).
@@ -380,9 +366,9 @@ DO:
   hQueryHandle:QUERY-OPEN().
   
   brCustomers:SET-REPOSITIONED-ROW(iCount,"ALWAYS").
-  REPOSITION brCustomers TO ROWID rowRowId.
-  iRowNumber = brCustomers:GET-REPOSITIONED-ROW().
   
+  REPOSITION brCustomers TO ROWID rowRowId.
+
   APPLY "VALUE-CHANGED" TO brCustomers.
 END.
 
@@ -510,28 +496,6 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME m_Contact
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Contact PDC-Win
-ON CHOOSE OF MENU-ITEM m_Contact /* Comments */
-DO:
-  OPEN QUERY brCustomers FOR EACH ttCustomers BY Comments.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&Scoped-define SELF-NAME m_Cust_Num
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Cust_Num PDC-Win
-ON CHOOSE OF MENU-ITEM m_Cust_Num /* Cust Num */
-DO:
-   OPEN QUERY brCustomers FOR EACH ttCustomers BY CustNum.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
 &Scoped-define SELF-NAME m_Delete
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Delete PDC-Win
 ON CHOOSE OF MENU-ITEM m_Delete /* Delete */
@@ -591,17 +555,6 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define SELF-NAME m_Name
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Name PDC-Win
-ON CHOOSE OF MENU-ITEM m_Name /* Name */
-DO:
-  OPEN QUERY brCustomers FOR EACH ttCustomers BY NAME.
-END.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
 &Scoped-define SELF-NAME m_New
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_New PDC-Win
 ON CHOOSE OF MENU-ITEM m_New /* New */
@@ -650,7 +603,7 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
    RUN InitializeObjects.
    SUBSCRIBE TO "CustBrowseNavigation" ANYWHERE.
-   SUBSCRIBE TO "ReopenQuery" ANYWHERE.
+   //SUBSCRIBE TO "ReopenQuery" ANYWHERE.
   RUN enable_UI.
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
     WAIT-FOR CLOSE OF THIS-PROCEDURE.
@@ -671,7 +624,8 @@ PROCEDURE CustBrowseNavigation :
 ------------------------------------------------------------------------------*/
   DEFINE INPUT PARAMETER piCustNum AS INTEGER NO-UNDO.
   DEFINE INPUT PARAMETER pcCustChanged AS CHARACTER NO-UNDO.
-  
+
+    
   CASE pcCustChanged:
     WHEN "First" THEN
      DO:
@@ -681,10 +635,12 @@ PROCEDURE CustBrowseNavigation :
      END.
     WHEN "Prev" THEN
      DO:
+        GET PREV brCustomers NO-LOCK.
         BROWSE brCustomers:SELECT-PREV-ROW() NO-ERROR.
      END.
     WHEN "Next" THEN
      DO:
+        GET NEXT brCustomers NO-LOCK.
         BROWSE brCustomers:SELECT-NEXT-ROW() NO-ERROR.
      END.
     WHEN "Last" THEN
@@ -709,7 +665,8 @@ PROCEDURE DelCustomer :
   Parameters:  
   Notes:       
 ------------------------------------------------------------------------------*/
-   MESSAGE "Wilt u" ttCustomers.Name "verwijderen?"
+   MESSAGE "Wilt u deze klant verwijderen? ~n" 
+           "Naam:" ttCustomers.Name
    VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE glResponse.
 
  IF glResponse THEN
@@ -758,7 +715,12 @@ PROCEDURE EditCustomer :
   Notes:       
 ------------------------------------------------------------------------------*/
    DEFINE VARIABLE rowRowIdent AS ROWID NO-UNDO.
-   
+   DEFINE VARIABLE iCount   AS INTEGER.
+
+   DO iCount = 1 TO brCustomers:NUM-ITERATIONS IN FRAME {&FRAME-NAME}:
+        IF brCustomers:IS-ROW-SELECTED(iCount) THEN LEAVE. 
+   END.
+      
    RUN gCustMaint.w ( INPUT "Mod":U,  
                       INPUT ghProcLib,
                       INPUT ttCustomers.RowIdent,
@@ -770,9 +732,10 @@ PROCEDURE EditCustomer :
     
     BUFFER-COPY ttCustomerUpd TO ttCustomers.
     
-    RUN ReopenQuery.
     FIND ttCustomers WHERE ttCustomers.rowIdent = rowRowIdent.
-    REPOSITION brCustomers TO ROWID ROWID(ttCustomers) NO-ERROR.
+    
+    brCustomers:SET-REPOSITIONED-ROW(iCount) IN FRAME {&FRAME-NAME}.
+    REPOSITION brCustomers TO ROWID ROWID(ttCustomers) NO-ERROR.  
     
 END PROCEDURE.
 
@@ -845,10 +808,9 @@ PROCEDURE NewCustomer :
   
     CREATE ttCustomers.
     BUFFER-COPY ttCustomerUpd TO ttCustomers.
-    RUN ReopenQuery.
     
     FIND ttCustomers WHERE ttCustomers.rowident = rowRowIdent.
-    
+    brCustomers:SET-REPOSITIONED-ROW(10) IN FRAME {&FRAME-NAME}. // hard coded 10 = pos. in de browse
     REPOSITION brCustomers TO ROWID ROWID(ttCustomers) NO-ERROR.
   END.                
 END PROCEDURE.
@@ -863,8 +825,7 @@ PROCEDURE ReopenQuery :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
-   QUERY brCustomers:QUERY-PREPARE(
-        SUBSTITUTE("FOR EACH ttCustomers NO-LOCK &1":U, gcSortClause)).
+   QUERY brCustomers:QUERY-PREPARE("FOR EACH ttCustomers NO-LOCK":U).
    QUERY brCustomers:QUERY-OPEN(). 
  
 END PROCEDURE.
