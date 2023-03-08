@@ -7,10 +7,6 @@
 
 
 /* Temp-Table and Buffer definitions                                    */
-DEFINE TEMP-TABLE ttCustomers NO-UNDO LIKE Customer
-       FIELD RowIdent AS ROWID
-       INDEX RowIdent RowIdent
-       .
 DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Salesrep
        FIELD RowIdent AS ROWID
        INDEX RowIdent RowIdent
@@ -48,7 +44,7 @@ DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Salesrep
 CREATE WIDGET-POOL.
 
 /* ***************************  Definitions  ************************** */
-
+{ttCustomer.i}
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
@@ -72,27 +68,27 @@ DEFINE VARIABLE lFirstNavButtons  AS LOGICAL INITIAL YES NO-UNDO.
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
-&Scoped-define INTERNAL-TABLES ttCustomers
+&Scoped-define INTERNAL-TABLES ttCustomer
 
 /* Definitions for FRAME DEFAULT-FRAME                                  */
-&Scoped-define FIELDS-IN-QUERY-DEFAULT-FRAME ttCustomers.CustNum ~
-ttCustomers.Name ttCustomers.Address ttCustomers.Address2 ttCustomers.State ~
-ttCustomers.City ttCustomers.PostalCode ttCustomers.Country ~
-ttCustomers.Phone ttCustomers.EmailAddress ttCustomers.SalesRep 
-&Scoped-define QUERY-STRING-DEFAULT-FRAME FOR EACH ttCustomers SHARE-LOCK
-&Scoped-define OPEN-QUERY-DEFAULT-FRAME OPEN QUERY DEFAULT-FRAME FOR EACH ttCustomers SHARE-LOCK.
-&Scoped-define TABLES-IN-QUERY-DEFAULT-FRAME ttCustomers
-&Scoped-define FIRST-TABLE-IN-QUERY-DEFAULT-FRAME ttCustomers
+&Scoped-define FIELDS-IN-QUERY-DEFAULT-FRAME ttCustomer.CustNum ~
+ttCustomer.Name ttCustomer.Address ttCustomer.Address2 ttCustomer.State ~
+ttCustomer.City ttCustomer.PostalCode ttCustomer.Country ~
+ttCustomer.Phone ttCustomer.EmailAddress ttCustomer.SalesRep 
+&Scoped-define QUERY-STRING-DEFAULT-FRAME FOR EACH ttCustomer SHARE-LOCK
+&Scoped-define OPEN-QUERY-DEFAULT-FRAME OPEN QUERY DEFAULT-FRAME FOR EACH ttCustomer SHARE-LOCK.
+&Scoped-define TABLES-IN-QUERY-DEFAULT-FRAME ttCustomer
+&Scoped-define FIRST-TABLE-IN-QUERY-DEFAULT-FRAME ttCustomer
 
 
 /* Standard List Definitions                                            */
 &Scoped-Define ENABLED-OBJECTS RECT-14 BtnDone 
-&Scoped-Define DISPLAYED-FIELDS ttCustomers.CustNum ttCustomers.Name ~
-ttCustomers.Address ttCustomers.Address2 ttCustomers.State ttCustomers.City ~
-ttCustomers.PostalCode ttCustomers.Country ttCustomers.Phone ~
-ttCustomers.EmailAddress ttCustomers.SalesRep 
-&Scoped-define DISPLAYED-TABLES ttCustomers
-&Scoped-define FIRST-DISPLAYED-TABLE ttCustomers
+&Scoped-Define DISPLAYED-FIELDS ttCustomer.CustNum ttCustomer.Name ~
+ttCustomer.Address ttCustomer.Address2 ttCustomer.State ttCustomer.City ~
+ttCustomer.PostalCode ttCustomer.Country ttCustomer.Phone ~
+ttCustomer.EmailAddress ttCustomer.SalesRep 
+&Scoped-define DISPLAYED-TABLES ttCustomer
+&Scoped-define FIRST-DISPLAYED-TABLE ttCustomer
 
 
 /* Custom List Definitions                                              */
@@ -111,31 +107,31 @@ DEFINE VAR C-Win AS WIDGET-HANDLE NO-UNDO.
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON BtnDone DEFAULT 
      LABEL "&Sluiten" 
-     SIZE 20 BY 1.14
+     SIZE 20 BY 1.13
      BGCOLOR 8 .
 
 DEFINE BUTTON BtnFirst 
      IMAGE-UP FILE "adeicon/first.bmp":U
      LABEL "&First" 
-     SIZE 5 BY 1.14
+     SIZE 5 BY 1.13
      BGCOLOR 8 .
 
 DEFINE BUTTON BtnLast 
      IMAGE-UP FILE "adeicon/last.bmp":U
      LABEL "&Last" 
-     SIZE 5 BY 1.14
+     SIZE 5 BY 1.13
      BGCOLOR 8 .
 
 DEFINE BUTTON BtnNext 
      IMAGE-UP FILE "adeicon/next.bmp":U
      LABEL "&Next" 
-     SIZE 5 BY 1.14
+     SIZE 5 BY 1.13
      BGCOLOR 8 .
 
 DEFINE BUTTON BtnPrev 
      IMAGE-UP FILE "adeicon/prev.bmp":U
      LABEL "&Prev" 
-     SIZE 5 BY 1.14
+     SIZE 5 BY 1.13
      BGCOLOR 8 .
 
 DEFINE RECTANGLE RECT-14
@@ -145,7 +141,7 @@ DEFINE RECTANGLE RECT-14
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
 DEFINE QUERY DEFAULT-FRAME FOR 
-      ttCustomers SCROLLING.
+      ttCustomer SCROLLING.
 &ANALYZE-RESUME
 
 /* ************************  Frame Definitions  *********************** */
@@ -156,56 +152,56 @@ DEFINE FRAME DEFAULT-FRAME
      BtnPrev AT ROW 3.38 COL 85 WIDGET-ID 30
      BtnNext AT ROW 3.38 COL 90 WIDGET-ID 28
      BtnLast AT ROW 3.38 COL 95 WIDGET-ID 32
-     ttCustomers.CustNum AT ROW 3.62 COL 19 COLON-ALIGNED WIDGET-ID 50
+     ttCustomer.CustNum AT ROW 3.63 COL 19 COLON-ALIGNED WIDGET-ID 50
           VIEW-AS FILL-IN 
           SIZE 9 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.Name AT ROW 4.57 COL 19 COLON-ALIGNED WIDGET-ID 54
+     ttCustomer.Name AT ROW 4.56 COL 19 COLON-ALIGNED WIDGET-ID 54
           VIEW-AS FILL-IN 
           SIZE 37 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.Address AT ROW 5.52 COL 19 COLON-ALIGNED WIDGET-ID 42
+     ttCustomer.Address AT ROW 5.53 COL 19 COLON-ALIGNED WIDGET-ID 42
           VIEW-AS FILL-IN 
           SIZE 37 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.Address2 AT ROW 6.48 COL 19 COLON-ALIGNED WIDGET-ID 44
+     ttCustomer.Address2 AT ROW 6.47 COL 19 COLON-ALIGNED WIDGET-ID 44
           VIEW-AS FILL-IN 
           SIZE 37 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.State AT ROW 7.43 COL 19 COLON-ALIGNED WIDGET-ID 60
+     ttCustomer.State AT ROW 7.44 COL 19 COLON-ALIGNED WIDGET-ID 60
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.City AT ROW 8.38 COL 19 COLON-ALIGNED WIDGET-ID 46
+     ttCustomer.City AT ROW 8.38 COL 19 COLON-ALIGNED WIDGET-ID 46
           VIEW-AS FILL-IN 
           SIZE 27 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.PostalCode AT ROW 9.33 COL 19 COLON-ALIGNED WIDGET-ID 58
+     ttCustomer.PostalCode AT ROW 9.34 COL 19 COLON-ALIGNED WIDGET-ID 58
           VIEW-AS FILL-IN 
-          SIZE 15.6 BY 1
+          SIZE 15.63 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.Country AT ROW 10.29 COL 19 COLON-ALIGNED WIDGET-ID 48
-          VIEW-AS FILL-IN 
-          SIZE 22 BY 1
-          FGCOLOR 1 FONT 6
-     ttCustomers.Phone AT ROW 11.24 COL 19 COLON-ALIGNED WIDGET-ID 56
+     ttCustomer.Country AT ROW 10.28 COL 19 COLON-ALIGNED WIDGET-ID 48
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.EmailAddress AT ROW 12.19 COL 19 COLON-ALIGNED WIDGET-ID 52
+     ttCustomer.Phone AT ROW 11.25 COL 19 COLON-ALIGNED WIDGET-ID 56
+          VIEW-AS FILL-IN 
+          SIZE 22 BY 1
+          FGCOLOR 1 FONT 6
+     ttCustomer.EmailAddress AT ROW 12.19 COL 19 COLON-ALIGNED WIDGET-ID 52
           VIEW-AS FILL-IN 
           SIZE 52 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomers.SalesRep AT ROW 13.14 COL 19 COLON-ALIGNED WIDGET-ID 40
+     ttCustomer.SalesRep AT ROW 13.13 COL 19 COLON-ALIGNED WIDGET-ID 40
           VIEW-AS COMBO-BOX INNER-LINES 5
           LIST-ITEM-PAIRS "None","None"
           DROP-DOWN-LIST
           SIZE 30 BY 1
           FGCOLOR 1 FONT 6
      "Details" VIEW-AS TEXT
-          SIZE 8 BY .95 AT ROW 1.24 COL 11 WIDGET-ID 36
+          SIZE 8 BY .94 AT ROW 1.25 COL 11 WIDGET-ID 36
           FGCOLOR 9 FONT 6
-     RECT-14 AT ROW 1.71 COL 3 WIDGET-ID 34
+     RECT-14 AT ROW 1.72 COL 3 WIDGET-ID 34
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -221,12 +217,6 @@ DEFINE FRAME DEFAULT-FRAME
    Allow: Basic,Browse,DB-Fields,Window,Query
    Other Settings: COMPILE
    Temp-Tables and Buffers:
-      TABLE: ttCustomers T "?" NO-UNDO sports2000 Customer
-      ADDITIONAL-FIELDS:
-          FIELD RowIdent AS ROWID
-          INDEX RowIdent RowIdent
-          
-      END-FIELDS.
       TABLE: ttSalesrep T "?" NO-UNDO sports2000 Salesrep
       ADDITIONAL-FIELDS:
           FIELD RowIdent AS ROWID
@@ -244,12 +234,12 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "Customer Details"
-         HEIGHT             = 15.24
-         WIDTH              = 106.2
-         MAX-HEIGHT         = 19.71
-         MAX-WIDTH          = 111.8
-         VIRTUAL-HEIGHT     = 19.71
-         VIRTUAL-WIDTH      = 111.8
+         HEIGHT             = 15.25
+         WIDTH              = 106.25
+         MAX-HEIGHT         = 19.72
+         MAX-WIDTH          = 111.75
+         VIRTUAL-HEIGHT     = 19.72
+         VIRTUAL-WIDTH      = 111.75
          RESIZE             = YES
          SCROLL-BARS        = NO
          STATUS-AREA        = NO
@@ -272,9 +262,9 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME DEFAULT-FRAME
    FRAME-NAME                                                           */
-/* SETTINGS FOR FILL-IN ttCustomers.Address IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.Address IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.Address2 IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.Address2 IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 /* SETTINGS FOR BUTTON BtnFirst IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
@@ -284,23 +274,23 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
    NO-ENABLE                                                            */
 /* SETTINGS FOR BUTTON BtnPrev IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.City IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.City IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.Country IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.Country IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.CustNum IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.CustNum IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.EmailAddress IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.EmailAddress IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.Name IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.Name IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.Phone IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.Phone IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.PostalCode IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.PostalCode IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR COMBO-BOX ttCustomers.SalesRep IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR COMBO-BOX ttCustomer.SalesRep IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
-/* SETTINGS FOR FILL-IN ttCustomers.State IN FRAME DEFAULT-FRAME
+/* SETTINGS FOR FILL-IN ttCustomer.State IN FRAME DEFAULT-FRAME
    NO-ENABLE                                                            */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
 THEN C-Win:HIDDEN = NO.
@@ -313,7 +303,7 @@ THEN C-Win:HIDDEN = NO.
 
 &ANALYZE-SUSPEND _QUERY-BLOCK FRAME DEFAULT-FRAME
 /* Query rebuild information for FRAME DEFAULT-FRAME
-     _TblList          = "Temp-Tables.ttCustomers"
+     _TblList          = "Temp-Tables.ttCustomer"
      _Query            is OPENED
 */  /* FRAME DEFAULT-FRAME */
 &ANALYZE-RESUME
@@ -367,16 +357,16 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnFirst C-Win
 ON CHOOSE OF BtnFirst IN FRAME DEFAULT-FRAME /* First */
 DO:
-      FIND FIRST ttCustomers NO-LOCK.
-      IF NOT CAN-FIND(ttCustomers) THEN 
+      FIND FIRST ttCustomer NO-LOCK.
+      IF NOT CAN-FIND(ttCustomer) THEN 
         lFirstNavButtons = NO.
         
       DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
-      PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "First").
-      PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).  //updates the Order Window
+      PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "First").
+      PUBLISH "fetchOrders":U(ttCustomer.CustNum,ttCustomer.NAME).  //updates the Order Window
       
       lLastNavButtons = YES.
-      RUN SetWindowName(ttCustomers.NAME).
+      RUN SetWindowName(ttCustomer.NAME).
       RUN SetButtons.
 END.
 
@@ -388,15 +378,15 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnLast C-Win
 ON CHOOSE OF BtnLast IN FRAME DEFAULT-FRAME /* Last */
 DO:
-     FIND LAST ttCustomers NO-LOCK.
-     IF NOT CAN-FIND(ttCustomers) THEN 
+     FIND LAST ttCustomer NO-LOCK.
+     IF NOT CAN-FIND(ttCustomer) THEN 
          lLastNavButtons = NO.
       DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
-      PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Last").
-      PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).
+      PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "Last").
+      PUBLISH "fetchOrders":U(ttCustomer.CustNum,ttCustomer.NAME).
       
       lFirstNavButtons = YES.
-      RUN SetWindowName(ttCustomers.NAME).
+      RUN SetWindowName(ttCustomer.NAME).
       RUN SetButtons.
 END.
 
@@ -408,21 +398,21 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnNext C-Win
 ON CHOOSE OF BtnNext IN FRAME DEFAULT-FRAME /* Next */
 DO:
-     FIND NEXT ttCustomers NO-LOCK.
-     IF AVAILABLE ttCustomers THEN
+     FIND NEXT ttCustomer NO-LOCK.
+     IF AVAILABLE ttCustomer THEN
      DO:
         DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
      END.
      ELSE
-        IF NOT AVAILABLE ttCustomers THEN 
+        IF NOT AVAILABLE ttCustomer THEN 
             lLastNavButtons = YES.
 
   
-  PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Next").
-  PUBLISH "fetchOrders":U(ttCustomers.CustNum,Customer.NAME).
+  PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "Next").
+  PUBLISH "fetchOrders":U(ttCustomer.CustNum,Customer.NAME).
   
-    lFirstNavButtons = YES.
-  RUN SetWindowName(ttCustomers.NAME).
+   lFirstNavButtons = YES.
+  RUN SetWindowName(ttCustomer.NAME).
   RUN SetButtons.
 END.
 
@@ -434,19 +424,19 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnPrev C-Win
 ON CHOOSE OF BtnPrev IN FRAME DEFAULT-FRAME /* Prev */
 DO:
-    FIND PREV ttCustomers NO-LOCK.
-     IF AVAILABLE ttCustomers THEN
+    FIND PREV ttCustomer NO-LOCK.
+     IF AVAILABLE ttCustomer THEN
      DO:
         DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
      END.
      ELSE
-         IF NOT AVAILABLE ttCustomers THEN 
+         IF NOT AVAILABLE ttCustomer THEN 
         lFirstNavButtons = YES.
-    PUBLISH "CustBrowseNavigation":U(ttCustomers.CustNum, "Prev").
-    PUBLISH "fetchOrders":U(ttCustomers.CustNum,ttCustomers.NAME).
+    PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "Prev").
+    PUBLISH "fetchOrders":U(ttCustomer.CustNum,ttCustomer.NAME).
     
     lLastNavButtons = YES. 
-    RUN SetWindowName(ttCustomers.NAME).
+    RUN SetWindowName(ttCustomer.NAME).
     RUN SetButtons.
 END.
 
@@ -493,9 +483,8 @@ END.
 
 /* **********************  Internal Procedures  *********************** */
 
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ButtonsSwitch C-Win
-PROCEDURE ButtonsSwitch:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ButtonsSwitch C-Win 
+PROCEDURE ButtonsSwitch :
 /*------------------------------------------------------------------------------
  Purpose: Turns off the navigation buttons on the first and last customer.
  Notes:
@@ -511,11 +500,9 @@ PROCEDURE ButtonsSwitch:
   END CASE.
 
 END PROCEDURE.
-    
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
-
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE CloseWindow C-Win 
 PROCEDURE CloseWindow :
@@ -564,11 +551,11 @@ PROCEDURE enable_UI :
 
   {&OPEN-QUERY-DEFAULT-FRAME}
   GET FIRST DEFAULT-FRAME.
-  IF AVAILABLE ttCustomers THEN 
-    DISPLAY ttCustomers.CustNum ttCustomers.Name ttCustomers.Address 
-          ttCustomers.Address2 ttCustomers.State ttCustomers.City 
-          ttCustomers.PostalCode ttCustomers.Country ttCustomers.Phone 
-          ttCustomers.EmailAddress ttCustomers.SalesRep 
+  IF AVAILABLE ttCustomer THEN 
+    DISPLAY ttCustomer.CustNum ttCustomer.Name ttCustomer.Address 
+          ttCustomer.Address2 ttCustomer.State ttCustomer.City 
+          ttCustomer.PostalCode ttCustomer.Country ttCustomer.Phone 
+          ttCustomer.EmailAddress ttCustomer.SalesRep 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   ENABLE RECT-14 BtnDone 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
@@ -588,18 +575,15 @@ PROCEDURE FindCustomer :
 ------------------------------------------------------------------------------*/
    DEFINE INPUT PARAMETER piCustNum AS INTEGER NO-UNDO.
       
-   FIND FIRST ttCustomers WHERE ttCustomers.CustNum = piCustNum NO-LOCK.
+   FIND FIRST ttCustomer WHERE ttCustomer.CustNum = piCustNum NO-LOCK.
    DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
-   {&window-name}:TITLE = 'Customer: ' + ttCustomers.NAME.
+   {&window-name}:TITLE = 'Customer: ' + ttCustomer.NAME.
    
    RUN SetButtons.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
-
-
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE InitializeObjects C-Win 
 PROCEDURE InitializeObjects :
@@ -611,13 +595,13 @@ PROCEDURE InitializeObjects :
  RUN PersistentProc.p PERSISTENT SET ghProcLib.
  ghDataUtil = DYNAMIC-FUNCTION('RunPersistent' IN ghProcLib, "DataUtil.p":U).
  
- RUN GetCustData IN ghDataUtil (OUTPUT TABLE ttCustomers).
+ RUN GetCustData IN ghDataUtil (OUTPUT TABLE ttCustomer).
  
  DO WITH FRAME {&FRAME-NAME}:
-    ttCustomers.SalesRep:DELIMITER = ";":U.
+    ttCustomer.SalesRep:DELIMITER = ";":U.
     RUN GetRepData IN ghDataUtil(OUTPUT TABLE ttSalesRep).
     FOR EACH ttSalesRep:
-        ttCustomers.SalesRep:ADD-LAST(ttSalesRep.RepName, ttSalesRep.SalesRep).
+        ttCustomer.SalesRep:ADD-LAST(ttSalesRep.RepName, ttSalesRep.SalesRep).
     END.
  END.
  
@@ -626,15 +610,6 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-
-
-
-
-
-
-
-
-
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetButtons C-Win 
 PROCEDURE SetButtons :
@@ -655,7 +630,6 @@ IF lFirstNavButtons THEN
         btnFirst            
         btnPrev
         WITH FRAME {&FRAME-NAME}.
-  
  END. 
  
 IF lLastNavButtons THEN

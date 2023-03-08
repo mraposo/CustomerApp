@@ -5,8 +5,21 @@
 */
 
 /* Temp-Table and Buffer definitions                                    */
-DEFINE TEMP-TABLE ttCustomer NO-UNDO LIKE Sports2000.Customer
+DEFINE TEMP-TABLE ttCustomer NO-UNDO 
        FIELD RowIdent AS ROWID
+       FIELD CustNum LIKE Customer.CustNum
+       FIELD Name LIKE Customer.Name
+       FIELD Comments LIKE Customer.Comments
+       FIELD Address LIKE Customer.Address
+       FIELD Address2 LIKE Customer.Address2
+       FIELD State LIKE Customer.State
+       FIELD City LIKE Customer.City
+       FIELD PostalCode LIKE Customer.PostalCode
+       FIELD Country LIKE Customer.Country
+       FIELD Phone LIKE Customer.Phone
+       FIELD EmailAddress LIKE Customer.EmailAddress
+       FIELD SalesRep LIKE Customer.SalesRep      
+       FIELD Orders AS INTEGER
        INDEX RowIdent RowIdent.
 DEFINE TEMP-TABLE ttInvoice NO-UNDO LIKE Sports2000.Invoice
        FIELD RowIdent AS ROWID
@@ -14,8 +27,7 @@ DEFINE TEMP-TABLE ttInvoice NO-UNDO LIKE Sports2000.Invoice
 DEFINE TEMP-TABLE ttItem NO-UNDO LIKE Sports2000.Item.
 DEFINE TEMP-TABLE ttOrder NO-UNDO LIKE Sports2000.Order
        FIELD RowIdent AS ROWID
-       INDEX RowIdent RowIdent
-       .
+       INDEX RowIdent RowIdent.
 DEFINE TEMP-TABLE ttOrderLine NO-UNDO LIKE Sports2000.OrderLine
        FIELD RowIdent AS ROWID
        INDEX RowIdent RowIdent.
@@ -34,16 +46,16 @@ DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Sports2000.Salesrep
     Description : Used by user interface procedures to operate on the database.
                   Run persistently to acccess internal procedures.
 
-    Author(s)   : Stan Swiercz 
-    Created     : November 2000
-                  Modified November 2003 - Bob Asbury
+    Author(s)   : Mario Raposo
+    Created     : 2023
+      
     Notes       :
   ----------------------------------------------------------------------*/
 /*          This .W file was created with the Progress AppBuilder.      */
 /*----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
-
+DEFINE VARIABLE iCounter AS INTEGER NO-UNDO.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -74,6 +86,7 @@ DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Sports2000.Salesrep
    Temp-Tables and Buffers:
       TABLE: ttCustomer T "?" NO-UNDO Sports2000 Customer
       ADDITIONAL-FIELDS:
+          FIELD Orders   AS INTEGER
           FIELD RowIdent AS ROWID
           INDEX RowIdent RowIdent
       END-FIELDS.
@@ -284,14 +297,38 @@ PROCEDURE GetCustData :
   Notes:       
 ------------------------------------------------------------------------------*/
     DEFINE OUTPUT PARAMETER TABLE FOR ttCustomer.
-
     EMPTY TEMP-TABLE ttCustomer.
+         
+    /*
+    FOR EACH Customer NO-LOCK: 
+        CREATE ttCustomer.
+
+       iCounter = 0.   
+       FOR EACH Order WHERE Order.OrderStatus = "Ordered" AND Order.CustNum = Customer.CustNum NO-LOCK:
+            iCounter = iCounter + 1.
+            BUFFER-COPY Customer TO ttCustomer.
+            ASSIGN 
+                ttCustomer.RowIdent = ROWID(Customer)
+                ttCustomer.Orders = iCounter.
+        END.  
+    END.
+    */
     
-    FOR EACH Customer NO-LOCK : 
+     
+    FOR EACH Customer NO-LOCK:
+        iCounter = 0. 
+        FOR EACH Order WHERE Order.CustNum = Customer.CustNum NO-LOCK:
+            iCounter = iCounter + 1.
+        END.
+        
         CREATE ttCustomer.
         BUFFER-COPY Customer TO ttCustomer.
-        ASSIGN ttCustomer.RowIdent = ROWID(Customer).
-    END.
+
+        ASSIGN 
+            ttCustomer.RowIdent = ROWID(Customer)
+            ttCustomer.Orders   = iCounter.
+    END.    
+       
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -324,7 +361,8 @@ PROCEDURE GetCustRecord :
   DO:
       CREATE ttCustomer.
       BUFFER-COPY Customer TO ttCustomer.
-      ASSIGN ttCustomer.RowIdent = ROWID(Customer).
+      ASSIGN 
+        ttCustomer.RowIdent = ROWID(Customer).
       RETURN.
   END.
   ELSE
@@ -663,7 +701,7 @@ PROCEDURE SaveCustRecord :
 ------------------------------------------------------------------------------*/
     DEFINE INPUT-OUTPUT PARAMETER TABLE FOR  ttCustomer.
     DEFINE INPUT PARAMETER pcMode AS CHARACTER  NO-UNDO.
-
+    
     FIND FIRST ttCustomer.
     DO TRANSACTION:
         IF pcMode = "New" THEN 
@@ -673,7 +711,7 @@ PROCEDURE SaveCustRecord :
                 EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
         /* Do the following for both new and modified records */
         IF AVAILABLE Customer THEN
-            BUFFER-COPY ttCustomer EXCEPT RowIdent CustNum TO Customer.
+            BUFFER-COPY ttCustomer EXCEPT RowIdent CustNum Orders TO Customer.
         ELSE
             IF LOCKED (Customer) THEN
                 RETURN "Record is locked.  Try later.".
@@ -681,9 +719,12 @@ PROCEDURE SaveCustRecord :
                 RETURN "Record has been deleted!".
     END. /* Transaction */
     FIND CURRENT Customer NO-LOCK.  /* Remove the lock */
+    
     BUFFER-COPY Customer TO ttCustomer.
-    ttCustomer.rowIdent = ROWID(Customer).
-    RETURN.
+    ASSIGN 
+        ttCustomer.Orders = iCounter  
+        ttCustomer.rowIdent = ROWID(Customer).
+    RETURN.    
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
