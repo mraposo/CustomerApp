@@ -8,9 +8,22 @@
 
 
 /* Temp-Table and Buffer definitions                                    */
-DEFINE TEMP-TABLE ttCustomerUpd NO-UNDO LIKE Customer
-       FIELD RowIdent AS ROWID
-       INDEX RowIdent RowIdent.
+DEFINE TEMP-TABLE ttCustomerUpd NO-UNDO
+    FIELD RowIdent     AS ROWID
+    FIELD CustNum      LIKE Customer.CustNum
+    FIELD Name         LIKE Customer.Name
+    FIELD Comments     LIKE Customer.Comments
+    FIELD Address      LIKE Customer.Address
+    FIELD Address2     LIKE Customer.Address2
+    FIELD State        LIKE Customer.State
+    FIELD City         LIKE Customer.City
+    FIELD PostalCode   LIKE Customer.PostalCode
+    FIELD Country      LIKE Customer.Country
+    FIELD Phone        LIKE Customer.Phone
+    FIELD EmailAddress LIKE Customer.EmailAddress
+    FIELD SalesRep     LIKE Customer.SalesRep      
+    FIELD Orders       AS INTEGER
+    INDEX RowIdent RowIdent.
 DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Salesrep
        FIELD RowIdent AS ROWID
        INDEX RowIdent RowIdent.
@@ -587,9 +600,7 @@ FUNCTION EmailValidation RETURNS LOGICAL
     v-left = SUBSTRING (cEmail, 1, (v-at - 1)).
     v-right = SUBSTRING(cEmail, (v-at + 1), (v-length - (v-at ))).
     v-dot = INDEX(v-right,".").
-    DISPLAY v-left.
-    DISPLAY v-right.
-
+    
     IF v-at = 0 OR v-dot = 0 OR length(v-left) = 0 OR length(v-right) = 0 THEN
     DO:
         RETURN FALSE.

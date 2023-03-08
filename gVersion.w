@@ -39,11 +39,11 @@
 &Scoped-define PROCEDURE-TYPE Dialog-Box
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME Dialog-Frame
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS IMAGE-1 
+&Scoped-Define ENABLED-OBJECTS IMAGE-3 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -58,24 +58,24 @@
 /* Define a dialog box                                                  */
 
 /* Definitions of the field level widgets                               */
-DEFINE IMAGE IMAGE-1
-     FILENAME "adeicon/croplogo.jpg":U
-     SIZE 45 BY 4.29.
+DEFINE IMAGE IMAGE-3
+     FILENAME "adeicon/theguild.png":U
+     SIZE 70 BY 4.5.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME Dialog-Frame
-     "Version 1.0  (BETA)" VIEW-AS TEXT
-          SIZE 23 BY .95 AT ROW 7.19 COL 17 WIDGET-ID 4
+     "Version 1.1" VIEW-AS TEXT
+          SIZE 12 BY .94 AT ROW 7.75 COL 35 WIDGET-ID 4
           FONT 6
      "Made by:  Mario Raposo" VIEW-AS TEXT
-          SIZE 25 BY 1.19 AT ROW 8.86 COL 16 WIDGET-ID 6
-     IMAGE-1 AT ROW 1.71 COL 7 WIDGET-ID 2
-     SPACE(4.39) SKIP(4.66)
+          SIZE 25 BY 1.19 AT ROW 9.5 COL 30 WIDGET-ID 6
+     IMAGE-3 AT ROW 2 COL 5 WIDGET-ID 10
+     SPACE(3.37) SKIP(5.33)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
-         TITLE "Version 1.0" WIDGET-ID 100.
+         TITLE "Version 1.1" WIDGET-ID 100.
 
 
 /* *********************** Procedure Settings ************************ */
@@ -94,7 +94,7 @@ DEFINE FRAME Dialog-Frame
 
 &ANALYZE-SUSPEND _RUN-TIME-ATTRIBUTES
 /* SETTINGS FOR DIALOG-BOX Dialog-Frame
-                                                                        */
+   FRAME-NAME                                                           */
 ASSIGN 
        FRAME Dialog-Frame:SCROLLABLE       = FALSE
        FRAME Dialog-Frame:HIDDEN           = TRUE.
@@ -110,7 +110,7 @@ ASSIGN
 
 &Scoped-define SELF-NAME Dialog-Frame
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL Dialog-Frame Dialog-Frame
-ON WINDOW-CLOSE OF FRAME Dialog-Frame /* Version 1.0 */
+ON WINDOW-CLOSE OF FRAME Dialog-Frame /* Version 1.1 */
 DO:
   APPLY "END-ERROR":U TO SELF.
 END.
@@ -175,7 +175,7 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  ENABLE IMAGE-1 
+  ENABLE IMAGE-3 
       WITH FRAME Dialog-Frame.
   VIEW FRAME Dialog-Frame.
   {&OPEN-BROWSERS-IN-QUERY-Dialog-Frame}

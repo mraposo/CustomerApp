@@ -50,7 +50,7 @@ CREATE WIDGET-POOL.
 &Scoped-define PROCEDURE-TYPE Window
 &Scoped-define DB-AWARE no
 
-/* Name of first Frame and/or Browse and/or first Query                 */
+/* Name of designated FRAME-NAME and/or first browse and/or first query */
 &Scoped-define FRAME-NAME DEFAULT-FRAME
 &Scoped-define BROWSE-NAME brOrders
 
@@ -59,7 +59,7 @@ CREATE WIDGET-POOL.
 
 /* Definitions for BROWSE brOrders                                      */
 &Scoped-define FIELDS-IN-QUERY-brOrders Order.CustNum Order.OrderDate ~
-Order.PromiseDate Order.ShipDate Order.Carrier 
+Order.PromiseDate Order.OrderStatus Order.ShipDate Order.Carrier 
 &Scoped-define ENABLED-FIELDS-IN-QUERY-brOrders 
 &Scoped-define QUERY-STRING-brOrders FOR EACH Order NO-LOCK INDEXED-REPOSITION
 &Scoped-define OPEN-QUERY-brOrders OPEN QUERY brOrders FOR EACH Order NO-LOCK INDEXED-REPOSITION.
@@ -90,12 +90,12 @@ DEFINE VAR C-Win AS WIDGET-HANDLE NO-UNDO.
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON BtnDone DEFAULT 
      LABEL "&Sluiten" 
-     SIZE 15 BY 1.14
+     SIZE 15 BY 1.13
      BGCOLOR 8 .
 
 DEFINE RECTANGLE RECT-15
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 84 BY 14.05.
+     SIZE 98 BY 14.06.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -108,28 +108,29 @@ DEFINE BROWSE brOrders
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS brOrders C-Win _STRUCTURED
   QUERY brOrders NO-LOCK DISPLAY
       Order.CustNum FORMAT ">>>>9":U
-      Order.OrderDate FORMAT "99/99/99":U WIDTH 11.2
-      Order.PromiseDate FORMAT "99/99/99":U WIDTH 15.2
-      Order.ShipDate FORMAT "99/99/9999":U WIDTH 20.2
-      Order.Carrier FORMAT "x(25)":U
+      Order.OrderDate FORMAT "99/99/99":U WIDTH 11.25
+      Order.PromiseDate FORMAT "99/99/99":U WIDTH 13.5
+      Order.OrderStatus FORMAT "x(20)":U WIDTH 16.5
+      Order.ShipDate FORMAT "99/99/9999":U WIDTH 14.5
+      Order.Carrier FORMAT "x(25)":U WIDTH 23
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-    WITH NO-ROW-MARKERS SEPARATORS SIZE 80 BY 10.95 ROW-HEIGHT-CHARS .57 FIT-LAST-COLUMN.
+    WITH NO-ROW-MARKERS SEPARATORS SIZE 94 BY 10.94 ROW-HEIGHT-CHARS .57 FIT-LAST-COLUMN.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     brOrders AT ROW 2.43 COL 5 WIDGET-ID 200
-     BtnDone AT ROW 13.86 COL 68 WIDGET-ID 2
+     brOrders AT ROW 2.44 COL 5 WIDGET-ID 200
+     BtnDone AT ROW 14 COL 83 WIDGET-ID 2
      "Orders" VIEW-AS TEXT
-          SIZE 8 BY .95 AT ROW 1 COL 10 WIDGET-ID 6
+          SIZE 8 BY .94 AT ROW 1 COL 10 WIDGET-ID 6
           FGCOLOR 9 FONT 6
-     RECT-15 AT ROW 1.48 COL 3 WIDGET-ID 4
+     RECT-15 AT ROW 1.47 COL 3 WIDGET-ID 4
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 87.2 BY 14.91
+         SIZE 101.88 BY 14.91
          DEFAULT-BUTTON BtnDone WIDGET-ID 100.
 
 
@@ -151,11 +152,11 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          HIDDEN             = YES
          TITLE              = "<insert window title>"
          HEIGHT             = 14.91
-         WIDTH              = 87.2
+         WIDTH              = 101.88
          MAX-HEIGHT         = 16.19
-         MAX-WIDTH          = 109.6
+         MAX-WIDTH          = 121.13
          VIRTUAL-HEIGHT     = 16.19
-         VIRTUAL-WIDTH      = 109.6
+         VIRTUAL-WIDTH      = 121.13
          RESIZE             = yes
          SCROLL-BARS        = no
          STATUS-AREA        = no
@@ -177,7 +178,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 /* SETTINGS FOR WINDOW C-Win
   VISIBLE,,RUN-PERSISTENT                                               */
 /* SETTINGS FOR FRAME DEFAULT-FRAME
-                                                                        */
+   FRAME-NAME                                                           */
 /* BROWSE-TAB brOrders RECT-15 DEFAULT-FRAME */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
 THEN C-Win:HIDDEN = no.
@@ -194,12 +195,15 @@ THEN C-Win:HIDDEN = no.
      _Options          = "NO-LOCK INDEXED-REPOSITION"
      _FldNameList[1]   = sports2000.Order.CustNum
      _FldNameList[2]   > sports2000.Order.OrderDate
-"Order.OrderDate" ? ? "date" ? ? ? ? ? ? no ? no no "11.2" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+"Order.OrderDate" ? ? "date" ? ? ? ? ? ? no ? no no "11.25" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _FldNameList[3]   > sports2000.Order.PromiseDate
-"Order.PromiseDate" ? ? "date" ? ? ? ? ? ? no ? no no "15.2" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[4]   > sports2000.Order.ShipDate
-"Order.ShipDate" ? ? "date" ? ? ? ? ? ? no ? no no "20.2" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[5]   = sports2000.Order.Carrier
+"Order.PromiseDate" ? ? "date" ? ? ? ? ? ? no ? no no "13.5" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[4]   > sports2000.Order.OrderStatus
+"Order.OrderStatus" ? ? "character" ? ? ? ? ? ? no ? no no "16.5" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[5]   > sports2000.Order.ShipDate
+"Order.ShipDate" ? ? "date" ? ? ? ? ? ? no ? no no "14.5" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
+     _FldNameList[6]   > sports2000.Order.Carrier
+"Order.Carrier" ? ? "character" ? ? ? ? ? ? no ? no no "23" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _Query            is OPENED
 */  /* BROWSE brOrders */
 &ANALYZE-RESUME
