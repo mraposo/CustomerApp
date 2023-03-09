@@ -29,7 +29,7 @@ DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Salesrep
 
   Author: Mario Raposo
 
-  Created: 
+  Created: Maart 2023
 
 ------------------------------------------------------------------------*/
 /*          This .W file was created with the Progress AppBuilder.      */
@@ -48,10 +48,10 @@ CREATE WIDGET-POOL.
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
-DEFINE VARIABLE ghProcLib AS HANDLE NO-UNDO.
-DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
-DEFINE VARIABLE lLastNavButtons AS LOGICAL INITIAL YES NO-UNDO.
-DEFINE VARIABLE lFirstNavButtons  AS LOGICAL INITIAL YES NO-UNDO.
+DEFINE VARIABLE ghProcLib         AS HANDLE NO-UNDO.
+DEFINE VARIABLE ghDataUtil        AS HANDLE NO-UNDO.
+DEFINE VARIABLE lLastNavButtons   AS LOGICAL NO-UNDO.
+DEFINE VARIABLE lFirstNavButtons  AS LOGICAL NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -73,8 +73,8 @@ DEFINE VARIABLE lFirstNavButtons  AS LOGICAL INITIAL YES NO-UNDO.
 /* Definitions for FRAME DEFAULT-FRAME                                  */
 &Scoped-define FIELDS-IN-QUERY-DEFAULT-FRAME ttCustomer.CustNum ~
 ttCustomer.Name ttCustomer.Address ttCustomer.Address2 ttCustomer.State ~
-ttCustomer.City ttCustomer.PostalCode ttCustomer.Country ~
-ttCustomer.Phone ttCustomer.EmailAddress ttCustomer.SalesRep 
+ttCustomer.City ttCustomer.PostalCode ttCustomer.Country ttCustomer.Phone ~
+ttCustomer.EmailAddress ttCustomer.SalesRep 
 &Scoped-define QUERY-STRING-DEFAULT-FRAME FOR EACH ttCustomer SHARE-LOCK
 &Scoped-define OPEN-QUERY-DEFAULT-FRAME OPEN QUERY DEFAULT-FRAME FOR EACH ttCustomer SHARE-LOCK.
 &Scoped-define TABLES-IN-QUERY-DEFAULT-FRAME ttCustomer
@@ -136,7 +136,7 @@ DEFINE BUTTON BtnPrev
 
 DEFINE RECTANGLE RECT-14
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 103 BY 13.81.
+     SIZE 103 BY 12.53.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -147,65 +147,65 @@ DEFINE QUERY DEFAULT-FRAME FOR
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     BtnDone AT ROW 2.19 COL 80 WIDGET-ID 24
-     BtnFirst AT ROW 3.38 COL 80 WIDGET-ID 26
-     BtnPrev AT ROW 3.38 COL 85 WIDGET-ID 30
-     BtnNext AT ROW 3.38 COL 90 WIDGET-ID 28
-     BtnLast AT ROW 3.38 COL 95 WIDGET-ID 32
-     ttCustomer.CustNum AT ROW 3.63 COL 19 COLON-ALIGNED WIDGET-ID 50
+     BtnDone AT ROW 2.25 COL 80 WIDGET-ID 24
+     ttCustomer.CustNum AT ROW 2.63 COL 19 COLON-ALIGNED WIDGET-ID 50
           VIEW-AS FILL-IN 
           SIZE 9 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.Name AT ROW 4.56 COL 19 COLON-ALIGNED WIDGET-ID 54
+     BtnFirst AT ROW 3.44 COL 80 WIDGET-ID 26
+     BtnPrev AT ROW 3.44 COL 85 WIDGET-ID 30
+     BtnNext AT ROW 3.44 COL 90 WIDGET-ID 28
+     BtnLast AT ROW 3.44 COL 95 WIDGET-ID 32
+     ttCustomer.Name AT ROW 3.56 COL 19 COLON-ALIGNED WIDGET-ID 54
           VIEW-AS FILL-IN 
           SIZE 37 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.Address AT ROW 5.53 COL 19 COLON-ALIGNED WIDGET-ID 42
+     ttCustomer.Address AT ROW 4.53 COL 19 COLON-ALIGNED WIDGET-ID 42
           VIEW-AS FILL-IN 
           SIZE 37 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.Address2 AT ROW 6.47 COL 19 COLON-ALIGNED WIDGET-ID 44
+     ttCustomer.Address2 AT ROW 5.47 COL 19 COLON-ALIGNED WIDGET-ID 44
           VIEW-AS FILL-IN 
           SIZE 37 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.State AT ROW 7.44 COL 19 COLON-ALIGNED WIDGET-ID 60
+     ttCustomer.State AT ROW 6.44 COL 19 COLON-ALIGNED WIDGET-ID 60
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.City AT ROW 8.38 COL 19 COLON-ALIGNED WIDGET-ID 46
+     ttCustomer.City AT ROW 7.38 COL 19 COLON-ALIGNED WIDGET-ID 46
           VIEW-AS FILL-IN 
           SIZE 27 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.PostalCode AT ROW 9.34 COL 19 COLON-ALIGNED WIDGET-ID 58
+     ttCustomer.PostalCode AT ROW 8.34 COL 19 COLON-ALIGNED WIDGET-ID 58
           VIEW-AS FILL-IN 
           SIZE 15.63 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.Country AT ROW 10.28 COL 19 COLON-ALIGNED WIDGET-ID 48
+     ttCustomer.Country AT ROW 9.28 COL 19 COLON-ALIGNED WIDGET-ID 48
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.Phone AT ROW 11.25 COL 19 COLON-ALIGNED WIDGET-ID 56
+     ttCustomer.Phone AT ROW 10.25 COL 19 COLON-ALIGNED WIDGET-ID 56
           VIEW-AS FILL-IN 
           SIZE 22 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.EmailAddress AT ROW 12.19 COL 19 COLON-ALIGNED WIDGET-ID 52
+     ttCustomer.EmailAddress AT ROW 11.19 COL 19 COLON-ALIGNED WIDGET-ID 52
           VIEW-AS FILL-IN 
           SIZE 52 BY 1
           FGCOLOR 1 FONT 6
-     ttCustomer.SalesRep AT ROW 13.13 COL 19 COLON-ALIGNED WIDGET-ID 40
+     ttCustomer.SalesRep AT ROW 12.13 COL 19 COLON-ALIGNED WIDGET-ID 40
           VIEW-AS COMBO-BOX INNER-LINES 5
           LIST-ITEM-PAIRS "None","None"
           DROP-DOWN-LIST
           SIZE 30 BY 1
           FGCOLOR 1 FONT 6
      "Details" VIEW-AS TEXT
-          SIZE 8 BY .94 AT ROW 1.25 COL 11 WIDGET-ID 36
+          SIZE 8 BY .94 AT ROW 1.5 COL 12 WIDGET-ID 36
           FGCOLOR 9 FONT 6
-     RECT-14 AT ROW 1.72 COL 3 WIDGET-ID 34
+     RECT-14 AT ROW 2 COL 3 WIDGET-ID 34
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 105.4 BY 15.67
+         SIZE 105.38 BY 13.84
          DEFAULT-BUTTON BtnDone WIDGET-ID 100.
 
 
@@ -234,7 +234,7 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
          TITLE              = "Customer Details"
-         HEIGHT             = 15.25
+         HEIGHT             = 13.88
          WIDTH              = 106.25
          MAX-HEIGHT         = 19.72
          MAX-WIDTH          = 111.75
@@ -250,6 +250,12 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          MESSAGE-AREA       = NO
          SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
+
+&IF '{&WINDOW-SYSTEM}' NE 'TTY' &THEN
+IF NOT C-Win:LOAD-ICON("adeicon/customer.ico":U) THEN
+    MESSAGE "Unable to load icon: adeicon/customer.ico"
+            VIEW-AS ALERT-BOX WARNING BUTTONS OK.
+&ENDIF
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
 
@@ -426,8 +432,9 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
   RUN InitializeObjects.
   RUN enable_UI .
     SUBSCRIBE TO "FetchCustomer"  IN SOURCE-PROCEDURE.
-    SUBSCRIBE TO "SetButtons"    IN SOURCE-PROCEDURE.
+    SUBSCRIBE TO "SetButtons"     IN SOURCE-PROCEDURE.
     SUBSCRIBE TO "CloseWindow" ANYWHERE.
+    SUBSCRIBE TO "Shutdown":U  ANYWHERE.
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
     WAIT-FOR CLOSE OF THIS-PROCEDURE.
 END.
@@ -542,10 +549,9 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetButtons C-Win
-PROCEDURE SetButtons:
- /*------------------------------------------------------------------------------
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetButtons C-Win 
+PROCEDURE SetButtons :
+/*------------------------------------------------------------------------------
      Purpose:
      Notes:
  ------------------------------------------------------------------------------*/
@@ -591,7 +597,21 @@ PROCEDURE SetButtons:
             WITH FRAME {&FRAME-NAME}.
     END.
 END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Shutdown C-Win
+PROCEDURE Shutdown:
+    /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+    IF THIS-PROCEDURE:PERSISTENT THEN
+        DELETE PROCEDURE THIS-PROCEDURE.
+END PROCEDURE.
     
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
 

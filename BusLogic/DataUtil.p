@@ -260,12 +260,9 @@ PROCEDURE GetOrderCount:
             ASSIGN ttOrderCount.CustNum = Order.CustNum
                    ttOrderCount.OrderCount = 1.
             END.
-        ELSE DO:
+        ELSE 
             ttOrderCount.OrderCount = ttOrderCount.OrderCount + 1.
-        END.
-    END.
-    
-    
+     END.  
 END PROCEDURE.
     
 /* _UIB-CODE-BLOCK-END */

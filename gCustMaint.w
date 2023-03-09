@@ -16,17 +16,18 @@ DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Salesrep
 
   File: 
 
-  Description: 
+  Description: Customer Maintenance
 
   Input Parameters:
-      <none>
+      
 
   Output Parameters:
-      <none>
+     
 
-  Author: 
+  Author: Mario Raposo 
 
-  Created: 
+  Created: Maart 2023
+  
 ------------------------------------------------------------------------*/
 /*          This .W file was created with the Progress AppBuilder.       */
 /*----------------------------------------------------------------------*/

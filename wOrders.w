@@ -22,14 +22,14 @@ DEFINE TEMP-TABLE ttOrder NO-UNDO LIKE Order
   Description: 
 
   Input Parameters:
-      <none>
+     
 
   Output Parameters:
-      <none>
+   
+   
+  Author: Mario Raposo
 
-  Author: 
-
-  Created: 
+  Created: Maart 2023
 
 ------------------------------------------------------------------------*/
 /*          This .W file was created with the Progress AppBuilder.      */
@@ -295,6 +295,7 @@ MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
    SUBSCRIBE TO "fetchOrders" ANYWHERE.
+   SUBSCRIBE TO "Shutdown":U  ANYWHERE.
   RUN InitializeObjects.
   RUN enable_UI.
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
@@ -381,4 +382,18 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Shutdown C-Win
+PROCEDURE Shutdown:
+/*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+------------------------------------------------------------------------------*/
+    IF THIS-PROCEDURE:PERSISTENT THEN
+        DELETE PROCEDURE THIS-PROCEDURE.
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 
