@@ -4,6 +4,16 @@
           sports2000       PROGRESS
 */
 &Scoped-define WINDOW-NAME C-Win
+
+
+/* Temp-Table and Buffer definitions                                    */
+DEFINE TEMP-TABLE ttOrder NO-UNDO LIKE Order
+       FIELD RowIdent AS ROWID
+       INDEX RowIdent RowIdent
+       .
+
+
+
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS C-Win 
 /*------------------------------------------------------------------------
 
@@ -38,6 +48,8 @@ CREATE WIDGET-POOL.
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
+DEFINE VARIABLE ghProcLib AS HANDLE NO-UNDO.
+DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -55,16 +67,16 @@ CREATE WIDGET-POOL.
 &Scoped-define BROWSE-NAME brOrders
 
 /* Internal Tables (found by Frame, Query & Browse Queries)             */
-&Scoped-define INTERNAL-TABLES Order
+&Scoped-define INTERNAL-TABLES ttOrder
 
 /* Definitions for BROWSE brOrders                                      */
-&Scoped-define FIELDS-IN-QUERY-brOrders Order.CustNum Order.OrderDate ~
-Order.PromiseDate Order.OrderStatus Order.ShipDate Order.Carrier 
-&Scoped-define ENABLED-FIELDS-IN-QUERY-brOrders 
-&Scoped-define QUERY-STRING-brOrders FOR EACH Order NO-LOCK INDEXED-REPOSITION
-&Scoped-define OPEN-QUERY-brOrders OPEN QUERY brOrders FOR EACH Order NO-LOCK INDEXED-REPOSITION.
-&Scoped-define TABLES-IN-QUERY-brOrders Order
-&Scoped-define FIRST-TABLE-IN-QUERY-brOrders Order
+&Scoped-define FIELDS-IN-QUERY-brOrders ttOrder.CustNum ttOrder.Ordernum ttOrder.OrderStatus ttOrder.Instructions ttOrder.Carrier   
+&Scoped-define ENABLED-FIELDS-IN-QUERY-brOrders   
+&Scoped-define SELF-NAME brOrders
+&Scoped-define QUERY-STRING-brOrders FOR EACH ttOrder NO-LOCK INDEXED-REPOSITION
+&Scoped-define OPEN-QUERY-brOrders OPEN QUERY {&SELF-NAME} FOR EACH ttOrder NO-LOCK INDEXED-REPOSITION.
+&Scoped-define TABLES-IN-QUERY-brOrders ttOrder
+&Scoped-define FIRST-TABLE-IN-QUERY-brOrders ttOrder
 
 
 /* Definitions for FRAME DEFAULT-FRAME                                  */
@@ -100,28 +112,27 @@ DEFINE RECTANGLE RECT-15
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
 DEFINE QUERY brOrders FOR 
-      Order SCROLLING.
+      ttOrder SCROLLING.
 &ANALYZE-RESUME
 
 /* Browse definitions                                                   */
 DEFINE BROWSE brOrders
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS brOrders C-Win _STRUCTURED
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS brOrders C-Win _FREEFORM
   QUERY brOrders NO-LOCK DISPLAY
-      Order.CustNum FORMAT ">>>>9":U
-      Order.OrderDate FORMAT "99/99/99":U WIDTH 11.25
-      Order.PromiseDate FORMAT "99/99/99":U WIDTH 13.5
-      Order.OrderStatus FORMAT "x(20)":U WIDTH 16.5
-      Order.ShipDate FORMAT "99/99/9999":U WIDTH 14.5
-      Order.Carrier FORMAT "x(25)":U WIDTH 23
+      ttOrder.CustNum FORMAT ">>>>9":U
+      ttOrder.Ordernum FORMAT "zzzzzzzzz9":U
+      ttOrder.OrderStatus FORMAT "x(20)":U
+      ttOrder.Creditcard FORMAT "x(25)":U
+      ttOrder.Carrier FORMAT "x(25)":U
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-    WITH NO-ROW-MARKERS SEPARATORS SIZE 94 BY 10.94 ROW-HEIGHT-CHARS .57 FIT-LAST-COLUMN.
+    WITH NO-ROW-MARKERS SEPARATORS SIZE 90 BY 10.75 FIT-LAST-COLUMN.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     brOrders AT ROW 2.44 COL 5 WIDGET-ID 200
+     brOrders AT ROW 2.25 COL 7 WIDGET-ID 200
      BtnDone AT ROW 14 COL 83 WIDGET-ID 2
      "Orders" VIEW-AS TEXT
           SIZE 8 BY .94 AT ROW 1 COL 10 WIDGET-ID 6
@@ -130,7 +141,7 @@ DEFINE FRAME DEFAULT-FRAME
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
-         SIZE 101.88 BY 14.91
+         SIZE 103.63 BY 17.22
          DEFAULT-BUTTON BtnDone WIDGET-ID 100.
 
 
@@ -141,6 +152,14 @@ DEFINE FRAME DEFAULT-FRAME
    Type: Window
    Allow: Basic,Browse,DB-Fields,Window,Query
    Other Settings: COMPILE
+   Temp-Tables and Buffers:
+      TABLE: ttOrder T "?" NO-UNDO Sports2000 Order
+      ADDITIONAL-FIELDS:
+          FIELD RowIdent AS ROWID
+          INDEX RowIdent RowIdent
+          
+      END-FIELDS.
+   END-TABLES.
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
 
@@ -150,23 +169,29 @@ DEFINE FRAME DEFAULT-FRAME
 IF SESSION:DISPLAY-TYPE = "GUI":U THEN
   CREATE WINDOW C-Win ASSIGN
          HIDDEN             = YES
-         TITLE              = "<insert window title>"
-         HEIGHT             = 14.91
-         WIDTH              = 101.88
-         MAX-HEIGHT         = 16.19
-         MAX-WIDTH          = 121.13
-         VIRTUAL-HEIGHT     = 16.19
-         VIRTUAL-WIDTH      = 121.13
-         RESIZE             = yes
-         SCROLL-BARS        = no
-         STATUS-AREA        = no
+         TITLE              = "Orders"
+         HEIGHT             = 14.81
+         WIDTH              = 101.25
+         MAX-HEIGHT         = 17.5
+         MAX-WIDTH          = 156.63
+         VIRTUAL-HEIGHT     = 17.5
+         VIRTUAL-WIDTH      = 156.63
+         RESIZE             = YES
+         SCROLL-BARS        = NO
+         STATUS-AREA        = NO
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = yes
-         THREE-D            = yes
-         MESSAGE-AREA       = no
-         SENSITIVE          = yes.
+         KEEP-FRAME-Z-ORDER = YES
+         THREE-D            = YES
+         MESSAGE-AREA       = NO
+         SENSITIVE          = YES.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
+
+&IF '{&WINDOW-SYSTEM}' NE 'TTY' &THEN
+IF NOT C-Win:LOAD-ICON("adeicon/orders.ico":U) THEN
+    MESSAGE "Unable to load icon: adeicon/orders.ico"
+            VIEW-AS ALERT-BOX WARNING BUTTONS OK.
+&ENDIF
 /* END WINDOW DEFINITION                                                */
 &ANALYZE-RESUME
 
@@ -181,7 +206,7 @@ ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
    FRAME-NAME                                                           */
 /* BROWSE-TAB brOrders RECT-15 DEFAULT-FRAME */
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = no.
+THEN C-Win:HIDDEN = NO.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -191,19 +216,10 @@ THEN C-Win:HIDDEN = no.
 
 &ANALYZE-SUSPEND _QUERY-BLOCK BROWSE brOrders
 /* Query rebuild information for BROWSE brOrders
-     _TblList          = "sports2000.Order"
+     _START_FREEFORM
+OPEN QUERY {&SELF-NAME} FOR EACH ttOrder NO-LOCK INDEXED-REPOSITION.
+     _END_FREEFORM
      _Options          = "NO-LOCK INDEXED-REPOSITION"
-     _FldNameList[1]   = sports2000.Order.CustNum
-     _FldNameList[2]   > sports2000.Order.OrderDate
-"Order.OrderDate" ? ? "date" ? ? ? ? ? ? no ? no no "11.25" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[3]   > sports2000.Order.PromiseDate
-"Order.PromiseDate" ? ? "date" ? ? ? ? ? ? no ? no no "13.5" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[4]   > sports2000.Order.OrderStatus
-"Order.OrderStatus" ? ? "character" ? ? ? ? ? ? no ? no no "16.5" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[5]   > sports2000.Order.ShipDate
-"Order.ShipDate" ? ? "date" ? ? ? ? ? ? no ? no no "14.5" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
-     _FldNameList[6]   > sports2000.Order.Carrier
-"Order.Carrier" ? ? "character" ? ? ? ? ? ? no ? no no "23" yes no no "U" "" "" "" "" "" "" 0 no 0 no no
      _Query            is OPENED
 */  /* BROWSE brOrders */
 &ANALYZE-RESUME
@@ -216,7 +232,7 @@ THEN C-Win:HIDDEN = no.
 
 &Scoped-define SELF-NAME C-Win
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
-ON END-ERROR OF C-Win /* <insert window title> */
+ON END-ERROR OF C-Win /* Orders */
 OR ENDKEY OF {&WINDOW-NAME} ANYWHERE DO:
   /* This case occurs when the user presses the "Esc" key.
      In a persistently run window, just ignore this.  If we did not, the
@@ -229,7 +245,7 @@ END.
 
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL C-Win C-Win
-ON WINDOW-CLOSE OF C-Win /* <insert window title> */
+ON WINDOW-CLOSE OF C-Win /* Orders */
 DO:
   /* This event will close the window and terminate the procedure.  */
   APPLY "CLOSE":U TO THIS-PROCEDURE.
@@ -279,6 +295,7 @@ MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
    SUBSCRIBE TO "fetchOrders" ANYWHERE.
+  RUN InitializeObjects.
   RUN enable_UI.
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
    WAIT-FOR CLOSE OF THIS-PROCEDURE.
@@ -332,20 +349,34 @@ END PROCEDURE.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE fetchOrders C-Win 
 PROCEDURE fetchOrders :
 /*------------------------------------------------------------------------------
-  Purpose:     
+  Purpose:  Fetch orders from wMain.w  and change the title dynamicly    
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
     DEFINE INPUT PARAMETER piCustNum AS INTEGER NO-UNDO.
     DEFINE INPUT PARAMETER pcCustName AS CHARACTER NO-UNDO.
-       
+    //MESSAGE piCustNum VIEW-AS ALERT-BOX.
     
     OPEN QUERY brOrders 
-        FOR EACH Order WHERE Order.CustNum = piCustNum NO-LOCK. 
+        FOR EACH ttOrder WHERE ttOrder.CustNum = piCustNum NO-LOCK. 
         
-    
-   
    {&window-name}:TITLE = 'Orders for: ' + pcCustName.
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE InitializeObjects C-Win 
+PROCEDURE InitializeObjects :
+/*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+    ------------------------------------------------------------------------------*/
+    RUN PersistentProc.p PERSISTENT SET ghProcLib.
+    ghDataUtil = DYNAMIC-FUNCTION('RunPersistent' IN ghProcLib, "DataUtil.p":U).
+ 
+    RUN GetOrderData IN ghDataUtil (OUTPUT TABLE ttOrder).
+ 
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */

@@ -15,7 +15,7 @@
   Output Parameters:
       <none>
 
-  Author: 
+  Author: Mario Raposo
 
   Created: 
 ------------------------------------------------------------------------*/
@@ -67,10 +67,10 @@ DEFINE IMAGE IMAGE-3
 
 DEFINE FRAME Dialog-Frame
      "Version 1.1" VIEW-AS TEXT
-          SIZE 12 BY .94 AT ROW 7.75 COL 35 WIDGET-ID 4
+          SIZE 12 BY .94 AT ROW 8.75 COL 32 WIDGET-ID 4
           FONT 6
      "Made by:  Mario Raposo" VIEW-AS TEXT
-          SIZE 25 BY 1.19 AT ROW 9.5 COL 30 WIDGET-ID 6
+          SIZE 23 BY 1.19 AT ROW 10 COL 27 WIDGET-ID 6
      IMAGE-3 AT ROW 2 COL 5 WIDGET-ID 10
      SPACE(3.37) SKIP(5.33)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
@@ -127,7 +127,7 @@ END.
 /* ***************************  Main Block  *************************** */
 
 /* Parent the dialog-box to the ACTIVE-WINDOW, if there is no parent.   */
-IF VALID-HANDLE(ACTIVE-WINDOW) AND FRAME {&FRAME-NAME}:PARENT eq ?
+IF VALID-HANDLE(ACTIVE-WINDOW) AND FRAME {&FRAME-NAME}:PARENT EQ ?
 THEN FRAME {&FRAME-NAME}:PARENT = ACTIVE-WINDOW.
 
 

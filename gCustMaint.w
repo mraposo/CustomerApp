@@ -6,29 +6,10 @@
 &Scoped-define WINDOW-NAME CURRENT-WINDOW
 &Scoped-define FRAME-NAME mainFrame
 
-
 /* Temp-Table and Buffer definitions                                    */
-DEFINE TEMP-TABLE ttCustomerUpd NO-UNDO
-    FIELD RowIdent     AS ROWID
-    FIELD CustNum      LIKE Customer.CustNum
-    FIELD Name         LIKE Customer.Name
-    FIELD Comments     LIKE Customer.Comments
-    FIELD Address      LIKE Customer.Address
-    FIELD Address2     LIKE Customer.Address2
-    FIELD State        LIKE Customer.State
-    FIELD City         LIKE Customer.City
-    FIELD PostalCode   LIKE Customer.PostalCode
-    FIELD Country      LIKE Customer.Country
-    FIELD Phone        LIKE Customer.Phone
-    FIELD EmailAddress LIKE Customer.EmailAddress
-    FIELD SalesRep     LIKE Customer.SalesRep      
-    FIELD Orders       AS INTEGER
-    INDEX RowIdent RowIdent.
 DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Salesrep
        FIELD RowIdent AS ROWID
        INDEX RowIdent RowIdent.
-
-
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS mainFrame 
 /*------------------------------------------------------------------------
@@ -51,20 +32,19 @@ DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Salesrep
 /*----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
-
+{ttCustomer.i}
 /* Parameters Definitions ---                                           */
-DEFINE INPUT PARAMETER pcMode AS CHARACTER NO-UNDO.
-DEFINE INPUT PARAMETER phProcLib AS HANDLE NO-UNDO.
-DEFINE INPUT PARAMETER prowRowId AS ROWID NO-UNDO.
+DEFINE INPUT PARAMETER pcMode        AS CHARACTER NO-UNDO.
+DEFINE INPUT PARAMETER phProcLib     AS HANDLE NO-UNDO.
+DEFINE INPUT PARAMETER piNumOfOrders AS INTEGER NO-UNDO. // number of orders per customer 
+DEFINE INPUT PARAMETER prowRowId     AS ROWID NO-UNDO.
 
 DEFINE OUTPUT PARAMETER TABLE FOR ttCustomerUpd.
 
 /* Local Variable Definitions ---                                       */
-
-//DEFINE VARIABLE glResponse AS LOGICAL NO-UNDO.
-
-DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
-DEFINE VARIABLE lEmailCheck AS LOGICAL NO-UNDO.
+DEFINE VARIABLE ghDataUtil   AS HANDLE NO-UNDO.
+DEFINE VARIABLE lEmailCheck  AS LOGICAL NO-UNDO.
+DEFINE VARIABLE cDialogTitle AS CHARACTER NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
@@ -154,11 +134,11 @@ FUNCTION PostalcodeValidation RETURNS CHARACTER
 
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON btnSave 
-     LABEL "Save" 
+     LABEL "Opslaan" 
      SIZE 15 BY 1.13.
 
 DEFINE BUTTON Btn_Cancel AUTO-END-KEY 
-     LABEL "Cancel" 
+     LABEL "Sluiten" 
      SIZE 15 BY 1.13
      BGCOLOR 8 .
 
@@ -214,7 +194,7 @@ DEFINE FRAME mainFrame
           DROP-DOWN-LIST
           SIZE 29 BY 1
      btnSave AT ROW 2.5 COL 96 WIDGET-ID 30
-     Btn_Cancel AT ROW 3.5 COL 96
+     Btn_Cancel AT ROW 3.75 COL 96
      ttCustomerUpd.CustNum AT ROW 3 COL 12.25 WIDGET-ID 10
           VIEW-AS FILL-IN 
           SIZE 9 BY 1
@@ -225,7 +205,7 @@ DEFINE FRAME mainFrame
      SPACE(1.99) SKIP(0.18)
     WITH VIEW-AS DIALOG-BOX KEEP-TAB-ORDER 
          SIDE-LABELS NO-UNDERLINE THREE-D  SCROLLABLE 
-         TITLE "Customer Maintenance"
+         TITLE cDialogTitle
          CANCEL-BUTTON Btn_Cancel WIDGET-ID 100.
 
 
@@ -304,7 +284,7 @@ ASSIGN
 
 &Scoped-define SELF-NAME mainFrame
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL mainFrame mainFrame
-ON WINDOW-CLOSE OF FRAME mainFrame /* Customer Maintenance */
+ON WINDOW-CLOSE OF FRAME mainFrame /* cDialogTitle */
 DO:
   APPLY "END-ERROR":U TO SELF.
 END.
@@ -315,7 +295,7 @@ END.
 
 &Scoped-define SELF-NAME btnSave
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnSave mainFrame
-ON CHOOSE OF btnSave IN FRAME mainFrame /* Save */
+ON CHOOSE OF btnSave IN FRAME mainFrame /* Opslaan */
 DO:
   RUN ProcessForm. 
 END.
@@ -340,7 +320,8 @@ END.
 ON LEAVE OF ttCustomerUpd.PostalCode IN FRAME mainFrame /* Postal Code */
 DO:
   IF ttCustomerUpd.Country:INPUT-VALUE = "NL" OR  
-     ttCustomerUpd.Country:INPUT-VALUE = "Nederland" THEN
+     ttCustomerUpd.Country:INPUT-VALUE = "Nederland" OR
+     ttCustomerUpd.Country:INPUT-VALUE = "Netherlands" THEN
   DO:
      ttCustomerUpd.PostalCode:SCREEN-VALUE = PostalcodeValidation(ttCustomerUpd.PostalCode:INPUT-VALUE).
   END.
@@ -450,16 +431,16 @@ PROCEDURE InitializeObjects :
  IF pcMode = "Mod":U THEN
  DO:
     RUN GetCustRecord IN ghDataUtil (OUTPUT TABLE ttCustomerUpd,
+                                     INPUT piNumOfOrders,
                                      INPUT prowRowId).                                  
     IF RETURN-VALUE = "" THEN
-        FIND FIRST ttCustomerUpd.
- 
-   //mainFrame:TITLE = 'Customer: ' + ttCustomerUpd.NAME.     
-  
+        FIND FIRST ttCustomerUpd.   
+         cDialogTitle = "Customer: " + ttCustomerUpd.Name.
  END.                                   
  ELSE DO:
     CREATE ttCustomerUpd.
-    ttCustomerUpd.Country = "".
+    ASSIGN ttCustomerUpd.Country = ""
+           cDialogTitle = "New Customer".
  END.
  
  PUBLISH "CloseWindow".
@@ -541,13 +522,14 @@ PROCEDURE ProcessForm :
             RETURN.
         END.
         ELSE DO:
-            MESSAGE "Weet u dat zeker?" 
+            MESSAGE "Weet u zeker dat u" ttCustomerUpd.Name:INPUT-VALUE "wilt opslaan?" 
             VIEW-AS ALERT-BOX BUTTONS YES-NO UPDATE lAnswer.
             
          IF lAnswer THEN
          DO:
             ASSIGN {&DISPLAYED-FIELDS}.
             RUN SaveCustRecord IN ghDataUtil (INPUT-OUTPUT TABLE ttCustomerUpd,
+                                              INPUT piNumOfOrders,
                                               INPUT pcMode).                                                           
             IF RETURN-VALUE <> "" THEN
             DO:
@@ -559,13 +541,6 @@ PROCEDURE ProcessForm :
          END. 
          ELSE DO: 
             RETURN.
-           /*
-            FIND FIRST ttCustomerUpd.
-            IF pcMode = "New" THEN
-                DO:
-                    pcMode = "Mod".
-                END.
-            */   
          END.
       END.
    END.
@@ -585,7 +560,7 @@ FUNCTION EmailValidation RETURNS LOGICAL
     Notes:  
 ------------------------------------------------------------------------------*/
 
- DEFINE VARIABLE nChar    AS INTEGER.
+    DEFINE VARIABLE nChar    AS INTEGER.
     DEFINE VARIABLE v-length AS INTEGER.
     DEFINE VARIABLE v-left   AS CHARACTER FORMAT "x(50)" NO-UNDO .
     DEFINE VARIABLE v-right  AS CHARACTER FORMAT "x(50)" NO-UNDO .
@@ -596,16 +571,15 @@ FUNCTION EmailValidation RETURNS LOGICAL
     IF v-length< 5 THEN // Moet minimaal zijn: X@X.X
         RETURN FALSE.
 
-    v-at = INDEX(cEmail, "@").
-    v-left = SUBSTRING (cEmail, 1, (v-at - 1)).
+    v-at =    INDEX(cEmail, "@").
+    v-left =  SUBSTRING (cEmail, 1, (v-at - 1)).
     v-right = SUBSTRING(cEmail, (v-at + 1), (v-length - (v-at ))).
-    v-dot = INDEX(v-right,".").
+    v-dot =   INDEX(v-right,".").
     
     IF v-at = 0 OR v-dot = 0 OR length(v-left) = 0 OR length(v-right) = 0 THEN
     DO:
         RETURN FALSE.
     END.
-
 
     DO nChar = 1 TO LENGTH(v-left) :
         IF INDEX("ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789.-_" , CAPS(SUBSTRING(v-left,nChar,1))) = 0 THEN
@@ -641,10 +615,10 @@ FUNCTION NameValidation RETURNS CHARACTER
     IF cNaam = "" THEN RETURN "" .
 
     DO iCount = 1 TO NUM-ENTRIES(cNaam," "):
-    ASSIGN 
+     ASSIGN 
         cOutput = cOutput +
-    CAPS(SUBSTRING(ENTRY(iCount,cNaam," "),1,1)) +
-        LC(SUBSTRING(ENTRY(iCount,cNaam," "),2,LENGTH(ENTRY(iCount,cNaam," ")))) + " " .
+                  CAPS(SUBSTRING(ENTRY(iCount,cNaam," "),1,1)) +
+                  LC(SUBSTRING(ENTRY(iCount,cNaam," "),2,LENGTH(ENTRY(iCount,cNaam," ")))) + " " .
     END.
 
     RETURN cOutput.
@@ -665,7 +639,7 @@ FUNCTION PostalcodeValidation RETURNS CHARACTER
   
     DO iCount = 1 TO NUM-ENTRIES(cPostalCode):
        cOutput = SUBSTRING(ENTRY(iCount,cPostalCode),1,4) + 
-            CAPS(SUBSTRING(ENTRY(iCount,cPostalCode),5,6)).
+                 CAPS(SUBSTRING(ENTRY(iCount,cPostalCode),5,6)).
     
   cOutput = REPLACE(
             REPLACE(
