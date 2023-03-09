@@ -27,7 +27,7 @@ DEFINE TEMP-TABLE ttSalesrep NO-UNDO LIKE Salesrep
   Output Parameters:
       <none>
 
-  Author: 
+  Author: Mario Raposo
 
   Created: 
 
@@ -344,9 +344,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnDone C-Win
 ON CHOOSE OF BtnDone IN FRAME DEFAULT-FRAME /* Sluiten */
 DO:
-  
       APPLY "CLOSE":U TO THIS-PROCEDURE.
-
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -357,17 +355,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnFirst C-Win
 ON CHOOSE OF BtnFirst IN FRAME DEFAULT-FRAME /* First */
 DO:
-      FIND FIRST ttCustomer NO-LOCK.
-      IF NOT CAN-FIND(ttCustomer) THEN 
-        lFirstNavButtons = NO.
-        
-      DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
       PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "First").
-      PUBLISH "fetchOrders":U(ttCustomer.CustNum,ttCustomer.NAME).  //updates the Order Window
-      
-      lLastNavButtons = YES.
-      RUN SetWindowName(ttCustomer.NAME).
-      RUN SetButtons.
+      PUBLISH "fetchOrders":U(ttCustomer.CustNum,ttCustomer.NAME).  
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -378,16 +367,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnLast C-Win
 ON CHOOSE OF BtnLast IN FRAME DEFAULT-FRAME /* Last */
 DO:
-     FIND LAST ttCustomer NO-LOCK.
-     IF NOT CAN-FIND(ttCustomer) THEN 
-         lLastNavButtons = NO.
-      DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
       PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "Last").
       PUBLISH "fetchOrders":U(ttCustomer.CustNum,ttCustomer.NAME).
-      
-      lFirstNavButtons = YES.
-      RUN SetWindowName(ttCustomer.NAME).
-      RUN SetButtons.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -398,22 +379,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnNext C-Win
 ON CHOOSE OF BtnNext IN FRAME DEFAULT-FRAME /* Next */
 DO:
-     FIND NEXT ttCustomer NO-LOCK.
-     IF AVAILABLE ttCustomer THEN
-     DO:
-        DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
-     END.
-     ELSE
-        IF NOT AVAILABLE ttCustomer THEN 
-            lLastNavButtons = YES.
-
-  
-  PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "Next").
-  PUBLISH "fetchOrders":U(ttCustomer.CustNum,Customer.NAME).
-  
-   lFirstNavButtons = YES.
-  RUN SetWindowName(ttCustomer.NAME).
-  RUN SetButtons.
+     PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "Next").
+     PUBLISH "fetchOrders":U(ttCustomer.CustNum,Customer.NAME).
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -424,20 +391,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnPrev C-Win
 ON CHOOSE OF BtnPrev IN FRAME DEFAULT-FRAME /* Prev */
 DO:
-    FIND PREV ttCustomer NO-LOCK.
-     IF AVAILABLE ttCustomer THEN
-     DO:
-        DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}. 
-     END.
-     ELSE
-         IF NOT AVAILABLE ttCustomer THEN 
-        lFirstNavButtons = YES.
     PUBLISH "CustBrowseNavigation":U(ttCustomer.CustNum, "Prev").
     PUBLISH "fetchOrders":U(ttCustomer.CustNum,ttCustomer.NAME).
-    
-    lLastNavButtons = YES. 
-    RUN SetWindowName(ttCustomer.NAME).
-    RUN SetButtons.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -470,9 +425,9 @@ DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
   RUN InitializeObjects.
   RUN enable_UI .
-    SUBSCRIBE TO "FindCustomer"  IN SOURCE-PROCEDURE.
-    SUBSCRIBE TO "ButtonsSwitch" IN SOURCE-PROCEDURE.
-  SUBSCRIBE TO "CloseWindow" ANYWHERE.
+    SUBSCRIBE TO "FetchCustomer"  IN SOURCE-PROCEDURE.
+    SUBSCRIBE TO "SetButtons"    IN SOURCE-PROCEDURE.
+    SUBSCRIBE TO "CloseWindow" ANYWHERE.
   IF NOT THIS-PROCEDURE:PERSISTENT THEN
     WAIT-FOR CLOSE OF THIS-PROCEDURE.
 END.
@@ -482,27 +437,6 @@ END.
 
 
 /* **********************  Internal Procedures  *********************** */
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE ButtonsSwitch C-Win 
-PROCEDURE ButtonsSwitch :
-/*------------------------------------------------------------------------------
- Purpose: Turns off the navigation buttons on the first and last customer.
- Notes:
-------------------------------------------------------------------------------*/
-  DEFINE INPUT PARAMETER cValue AS CHARACTER NO-UNDO.
-  
-  CASE cValue:
-      WHEN "FirstOff" THEN lFirstNavButtons = NO.  
-      WHEN "FirstOn" THEN  lFirstNavButtons = YES.    
-      WHEN "LastOff" THEN lLastNavButtons = NO.
-      WHEN "LastOn" THEN  lLastNavButtons = YES.    
-      
-  END CASE.
-
-END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE CloseWindow C-Win 
 PROCEDURE CloseWindow :
@@ -566,10 +500,10 @@ END PROCEDURE.
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE FindCustomer C-Win 
-PROCEDURE FindCustomer :
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE FetchCustomer C-Win 
+PROCEDURE FetchCustomer :
 /*------------------------------------------------------------------------------
-  Purpose: Find the customer and display the customer    
+  Purpose: Find the customer, display the customer & change the title of the window    
   Parameters:  piCustNum = Customer Number 
   Notes:       
 ------------------------------------------------------------------------------*/
@@ -578,8 +512,7 @@ PROCEDURE FindCustomer :
    FIND FIRST ttCustomer WHERE ttCustomer.CustNum = piCustNum NO-LOCK.
    DISPLAY {&DISPLAYED-FIELDS} WITH FRAME {&FRAME-NAME}.
    {&window-name}:TITLE = 'Customer: ' + ttCustomer.NAME.
-   
-   RUN SetButtons.
+  
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -604,67 +537,61 @@ PROCEDURE InitializeObjects :
         ttCustomer.SalesRep:ADD-LAST(ttSalesRep.RepName, ttSalesRep.SalesRep).
     END.
  END.
- 
- RUN SetButtons.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetButtons C-Win 
-PROCEDURE SetButtons :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-IF lFirstNavButtons THEN
- DO:
-    ENABLE 
-        btnFirst
-        btnPrev
-        WITH FRAME {&FRAME-NAME}.  
- END.
- ELSE DO:              
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetButtons C-Win
+PROCEDURE SetButtons:
+ /*------------------------------------------------------------------------------
+     Purpose:
+     Notes:
+ ------------------------------------------------------------------------------*/
+ DEFINE INPUT PARAMETER pcValue AS CHARACTER NO-UNDO.
+    CASE pcValue:
+        WHEN "FirstOff" THEN 
+            lFirstNavButtons = NO.  
+        WHEN "FirstOn" THEN  
+            lFirstNavButtons = YES.    
+        WHEN "LastOff" THEN 
+            lLastNavButtons = NO.
+        WHEN "LastOn" THEN  
+            lLastNavButtons = YES.    
+    END CASE.
+          
+    IF lFirstNavButtons THEN
+    DO:
+        ENABLE 
+            btnFirst
+            btnPrev
+            WITH FRAME {&FRAME-NAME}.  
+    END.
+    ELSE 
+    DO:              
         DISABLE
-        btnFirst            
-        btnPrev
-        WITH FRAME {&FRAME-NAME}.
- END. 
+            btnFirst            
+            btnPrev
+            WITH FRAME {&FRAME-NAME}.
+    END. 
  
-IF lLastNavButtons THEN
- DO:
-    ENABLE 
-        btnLast
-        btnNext
-        WITH FRAME {&FRAME-NAME}.  
- END.
- ELSE DO:              
+    IF lLastNavButtons THEN
+    DO:
+        ENABLE 
+            btnLast
+            btnNext
+            WITH FRAME {&FRAME-NAME}.  
+    END.
+    ELSE 
+    DO:              
         DISABLE
-        btnLast
-        btnNext
-        WITH FRAME {&FRAME-NAME}.
-  
- END.
-   
-
+            btnLast
+            btnNext
+            WITH FRAME {&FRAME-NAME}.
+    END.
 END PROCEDURE.
-
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SetWindowName C-Win 
-PROCEDURE SetWindowName :
-/*------------------------------------------------------------------------------
-  Purpose:     
-  Parameters:  <none>
-  Notes:       
-------------------------------------------------------------------------------*/
-  DEFINE INPUT PARAMETER pcCustName AS CHARACTER NO-UNDO.
-  
-  {&window-name}:TITLE = 'Customer: ' + pcCustName.
-END PROCEDURE.
-
+    
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
