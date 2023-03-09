@@ -45,12 +45,10 @@ CREATE WIDGET-POOL.
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
-DEFINE VARIABLE ghProcLib AS HANDLE NO-UNDO.
-DEFINE VARIABLE ghDataUtil AS HANDLE NO-UNDO.
-
+DEFINE VARIABLE ghProcLib     AS HANDLE NO-UNDO.
+DEFINE VARIABLE ghDataUtil    AS HANDLE NO-UNDO.
 DEFINE VARIABLE hDetails      AS HANDLE NO-UNDO.
 DEFINE VARIABLE hOrders       AS HANDLE NO-UNDO.
-DEFINE VARIABLE glResponse    AS LOGICAL NO-UNDO.
 
 //DEFINE TEMP-TABLE ttCustomerUpd NO-UNDO LIKE ttCustomer.
 
@@ -561,8 +559,11 @@ ASSIGN CURRENT-WINDOW                = {&WINDOW-NAME}
 
 /* The CLOSE event can be used from inside or outside the procedure to  */
 /* terminate it.                                                        */
-ON CLOSE OF THIS-PROCEDURE 
-   RUN disable_UI.
+ON CLOSE OF THIS-PROCEDURE
+   DO:
+    PUBLISH "Shutdown". 
+    RUN disable_UI.
+  END.
 
 /* Best default for GUI applications is...                              */
 PAUSE 0 BEFORE-HIDE.
@@ -599,8 +600,7 @@ PROCEDURE CustBrowseNavigation :
   WHEN "First" THEN
   DO:
     GET FIRST brCustomers NO-LOCK.
-    IF AVAILABLE ttCustomer THEN
-        REPOSITION brCustomers TO ROWID ROWID(ttCustomer).
+    REPOSITION brCustomers TO ROWID ROWID(ttCustomer).
   END.
   WHEN "Prev" THEN
   DO:
@@ -613,9 +613,8 @@ PROCEDURE CustBrowseNavigation :
   WHEN "Last" THEN
   DO:
     GET LAST brCustomers NO-LOCK.
-    IF AVAILABLE ttCustomer THEN
-        brCustomers:SET-REPOSITIONED-ROW(13) IN FRAME {&FRAME-NAME}.
-        REPOSITION brCustomers TO ROWID ROWID(ttCustomer).
+    brCustomers:SET-REPOSITIONED-ROW(13) IN FRAME {&FRAME-NAME}.
+    REPOSITION brCustomers TO ROWID ROWID(ttCustomer).
   END.
  END CASE.
  APPLY "VALUE-CHANGED" TO brCustomers IN FRAME {&FRAME-NAME}.
@@ -627,14 +626,15 @@ END PROCEDURE.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE DelCustomer PDC-Win 
 PROCEDURE DelCustomer :
 /*------------------------------------------------------------------------------
-  Purpose:  Delete Customer     
-  Parameters:  
-  Notes:       
+      Purpose:  Delete Customer     
+      Parameters:  
+      Notes:       
 ------------------------------------------------------------------------------*/
-   MESSAGE "Wilt u" ttCustomer.Name "verwijderen?"
-   VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE glResponse.
+    
+    MESSAGE "Wilt u" ttCustomer.Name "verwijderen?"
+   VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lResponse AS LOGICAL.
 
- IF glResponse THEN
+ IF lResponse THEN
   DO:
       RUN DeleteCustomer IN ghDataUtil(INPUT ttCustomer.RowIdent).
       IF RETURN-VALUE = "" OR RETURN-VALUE MATCHES "*deleted*" THEN
