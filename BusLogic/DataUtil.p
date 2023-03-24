@@ -145,21 +145,14 @@ PROCEDURE GetCustData :
     DEFINE VARIABLE iCounter AS INTEGER NO-UNDO.
 
     EMPTY TEMP-TABLE ttCustomer.
-    
-    RUN GetOrderCount(OUTPUT TABLE ttOrderCount).
-
     FOR EACH Customer NO-LOCK:
         iCounter = 0.
-         
-        FIND FIRST ttOrderCount WHERE ttOrderCount.CustNum = Customer.CustNum NO-ERROR.
-        IF AVAILABLE ttOrderCount
-            THEN 
-        DO:
-            iCounter = ttOrderCount.OrderCount.
+
+        FOR EACH Order WHERE Order.CustNum = Customer.CustNum:
+                iCounter = iCounter + 1.
         END.
         
-        IF iCounter <> 0
-            THEN 
+        IF iCounter <> 0 THEN 
         DO:  
             CREATE ttCustomer.
             BUFFER-COPY Customer TO ttCustomer.
@@ -214,38 +207,6 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
-&IF DEFINED(EXCLUDE-GetOrderCount) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetOrderCount Procedure
-PROCEDURE GetOrderCount:
-/*------------------------------------------------------------------------------
-     Purpose:  Counts the total of orders PER CUSTOMER!
-     Notes:
-------------------------------------------------------------------------------*/
-    DEFINE OUTPUT PARAMETER TABLE FOR ttOrderCount.
-
-    EMPTY TEMP-TABLE ttOrderCount.
-
-    FOR EACH Order  NO-LOCK:  
-        FIND FIRST ttOrderCount WHERE ttOrderCount.CustNum = Order.CustNum NO-LOCK NO-ERROR.
-        IF NOT AVAILABLE ttOrderCount
-            THEN DO:
-            CREATE ttOrderCount.
-            ASSIGN ttOrderCount.CustNum = Order.CustNum
-                   ttOrderCount.OrderCount = 1.
-            END.
-        ELSE 
-            ttOrderCount.OrderCount = ttOrderCount.OrderCount + 1.
-     END.  
-END PROCEDURE.
-    
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ENDIF
-
-
 &IF DEFINED(EXCLUDE-GetOrderData) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetOrderData Procedure 
