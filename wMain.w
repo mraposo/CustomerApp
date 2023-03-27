@@ -602,7 +602,7 @@ PROCEDURE CustDetails :
     IF NOT VALID-HANDLE(hDetails) THEN 
     DO:
         RUN wCustDetails.w PERSISTENT SET hDetails.
-        SUBSCRIBE TO "CustBrowseNavigation" ANYWHERE.
+        SUBSCRIBE TO "CustBrowseNavigation" IN hDetails.
     END.
       
     PUBLISH "FetchCustomer"(ttCustomer.CustNum).

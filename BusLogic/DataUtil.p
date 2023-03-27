@@ -152,7 +152,7 @@ PROCEDURE GetCustData :
                 iCounter = iCounter + 1.
         END.
         
-        IF iCounter <> 0 THEN 
+        IF iCounter > 0 THEN 
         DO:  
             CREATE ttCustomer.
             BUFFER-COPY Customer TO ttCustomer.

@@ -293,7 +293,7 @@ PAUSE 0 BEFORE-HIDE.
 MAIN-BLOCK:
 DO ON ERROR   UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK
    ON END-KEY UNDO MAIN-BLOCK, LEAVE MAIN-BLOCK:
-   SUBSCRIBE TO "fetchOrders":U ANYWHERE.
+   SUBSCRIBE TO "fetchOrders":U IN SOURCE-PROCEDURE.
    SUBSCRIBE TO "Shutdown":U    ANYWHERE.
   RUN InitializeObjects.
   RUN enable_UI.
@@ -357,9 +357,9 @@ PROCEDURE fetchOrders :
     DEFINE INPUT PARAMETER pcCustName AS CHARACTER NO-UNDO.
     
     RUN GetOrderData IN ghDataUtil (INPUT piCustNum, OUTPUT TABLE ttOrder).
-    
-    OPEN QUERY brOrders FOR EACH ttOrder NO-LOCK. 
-        
+     
+   {&OPEN-QUERY-brOrders}
+      
    {&window-name}:TITLE = 'Orders for: ' + pcCustName.
 END PROCEDURE.
 
@@ -374,7 +374,7 @@ PROCEDURE InitializeObjects :
     ------------------------------------------------------------------------------*/
     RUN PersistentProc.p PERSISTENT SET ghProcLib.
     ghDataUtil = DYNAMIC-FUNCTION('RunPersistent' IN ghProcLib, "DataUtil.p":U).
-
+    
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
