@@ -380,8 +380,6 @@ PROCEDURE InitializeObjects :
   RUN PersistentProc.p PERSISTENT SET hProcLib.
   hDataUtil = DYNAMIC-FUNCTION('RunPersistent' IN hProcLib, "DataUtil.p":U).
   
-  MESSAGE pcMode
-  VIEW-AS ALERT-BOX.
   IF pcMode = "Edit" THEN 
     RUN GetOrderRecord IN hDataUtil (OUTPUT TABLE ttOrderUpd, INPUT piOrderNum).
 
