@@ -238,36 +238,6 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
-/*
-&IF DEFINED(EXCLUDE-GetInvoiceData) = 0 &THEN
-
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetInvoiceData Procedure
-PROCEDURE GetInvoiceData:
-/*------------------------------------------------------------------------------
- Purpose:
- Notes:  wordt niet gebruikt 
-------------------------------------------------------------------------------*/
-DEFINE OUTPUT PARAMETER TABLE FOR ttInvoice.
-DEFINE INPUT PARAMETER piValue AS INTEGER NO-UNDO.
-MESSAGE piValue
-VIEW-AS ALERT-BOX.
-EMPTY TEMP-TABLE ttInvoice NO-ERROR.
-
-FOR EACH Invoice WHERE Invoice.OrderNum = piValue NO-LOCK:
-    CREATE ttInvoice.
-    BUFFER-COPY Invoice TO ttInvoice.
-    ASSIGN ttInvoice.RowIdent = ROWID(Invoice).
-    RETURN.
-END.    
-
-END PROCEDURE.
-    
-/* _UIB-CODE-BLOCK-END */
-&ANALYZE-RESUME
-
-
-&ENDIF
-*/
 
 &IF DEFINED(EXCLUDE-GetInvoiceRecord) = 0 &THEN
 
@@ -282,20 +252,6 @@ PROCEDURE GetInvoiceRecord:
 
   EMPTY TEMP-TABLE ttInvoice NO-ERROR.
 
-/*  IF piValue <> ? THEN                                               */
-/*      FIND Invoice WHERE Invoice.OrderNum = piValue NO-LOCK NO-ERROR.*/
-/*  ELSE                                                               */
-/*      FIND LAST Invoice NO-LOCK NO-ERROR.                            */
-/*  IF AVAILABLE Invoice THEN                                          */
-/*  DO:                                                                */
-/*      CREATE ttInvoice.                                              */
-/*      BUFFER-COPY Invoice TO ttInvoice.                              */
-/*      ASSIGN ttInvoice.RowIdent = ROWID(Invoice).                    */
-/*      RETURN.                                                        */
-/*  END.                                                               */
-/*  ELSE                                                               */
-/*      RETURN "Record has been deleted!".                             */
-
     FIND FIRST Invoice WHERE Invoice.OrderNum = piOrderNum NO-LOCK NO-ERROR.
     IF AVAILABLE Invoice THEN 
     DO:
@@ -306,7 +262,7 @@ PROCEDURE GetInvoiceRecord:
     END.
     ELSE DO:
         MESSAGE "Invoice not available" VIEW-AS ALERT-BOX.
-        RETURN NO-APPLY. // scherm blijft openen..  is niet de bedoeling als er geen invoice is.
+        RETURN NO-APPLY.
     END.
 END PROCEDURE.
     
@@ -371,23 +327,6 @@ PROCEDURE GetOrderRecord:
         MESSAGE "Order not available" VIEW-AS ALERT-BOX.
         RETURN.
     END.
-
-/*
-  IF prOrderRow <> ? THEN
-      FIND Order WHERE ROWID(Order) = prOrderRow NO-LOCK NO-ERROR.
-  ELSE
-      FIND LAST Order NO-LOCK NO-ERROR.  
-  IF AVAILABLE Order THEN
-  DO:
-      CREATE ttOrder.
-      BUFFER-COPY Order TO ttOrder.
-      ASSIGN ttOrder.RowIdent = ROWID(Order).
-      RETURN.
-  END.
-  ELSE
-      RETURN "Record has been deleted!".  
-*/
-
 
 END PROCEDURE.
     

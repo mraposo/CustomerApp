@@ -379,7 +379,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiCustName PDC-Win
 ON VALUE-CHANGED OF fiCustName IN FRAME DEFAULT-FRAME
 DO:         
-   RUN SortCustomers("ttCustomer","").     
+   RUN SortCustomers("ttCustomer","").
+   APPLY "VALUE-CHANGED" TO {&BROWSE-NAME}.     
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -390,7 +391,8 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiCustNum PDC-Win
 ON VALUE-CHANGED OF fiCustNum IN FRAME DEFAULT-FRAME
 DO: 
-  RUN SortCustomers("ttCustomer",""). 
+  RUN SortCustomers("ttCustomer","").
+  APPLY "VALUE-CHANGED" TO {&BROWSE-NAME}.
 END.
 
 /* _UIB-CODE-BLOCK-END */
