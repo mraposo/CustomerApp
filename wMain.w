@@ -33,9 +33,8 @@
 CREATE WIDGET-POOL.
 
 /* ***************************  Definitions  ************************** */
-{ttCustomer.i}
-{ttCustomer.i &Suffix=Upd}
 {ttTables.i}
+{ttTables.i &Suffix=Upd}
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
@@ -86,6 +85,19 @@ btnOrders
 
 /* _UIB-PREPROCESSOR-BLOCK-END */
 &ANALYZE-RESUME
+
+/* ************************  Function Prototypes ********************** */
+
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION-FORWARD GetWhereClause PDC-Win
+FUNCTION GetWhereClause RETURNS CHARACTER 
+  (  ) FORWARD.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 
 
 
@@ -314,16 +326,16 @@ DO:
     DEFINE VARIABLE rowRowId     AS ROWID.
 
     rowRowId = ROWID(ttCustomer).
-    DO iCount = 1 TO brCustomers:NUM-ITERATIONS IN FRAME {&FRAME-NAME}:
-        IF brCustomers:IS-ROW-SELECTED(iCount) THEN LEAVE.
+    DO iCount = 1 TO {&BROWSE-NAME}:NUM-ITERATIONS IN FRAME {&FRAME-NAME}:
+        IF {&BROWSE-NAME}:IS-ROW-SELECTED(iCount) THEN LEAVE.
     END.
 
-    RUN SortCustomers("ttCustomer","","BY " + BROWSE brCustomers:CURRENT-COLUMN:NAME).
+    RUN SortCustomers("ttCustomer","BY " + BROWSE brCustomers:CURRENT-COLUMN:NAME).
     
-    brCustomers:SET-REPOSITIONED-ROW(iCount).
-    REPOSITION brCustomers TO ROWID rowRowId.  
+    {&BROWSE-NAME}:SET-REPOSITIONED-ROW(iCount).
+    REPOSITION {&BROWSE-NAME} TO ROWID rowRowId.  
       
-  APPLY "VALUE-CHANGED" TO brCustomers.
+  APPLY "VALUE-CHANGED" TO {&BROWSE-NAME}.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -366,29 +378,8 @@ END.
 &Scoped-define SELF-NAME fiCustName
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiCustName PDC-Win
 ON VALUE-CHANGED OF fiCustName IN FRAME DEFAULT-FRAME
-DO:
-    
-   IF INT(fiCustNum:SCREEN-VALUE) = 0 THEN 
-    DO:         
-      IF (fiCustName:SCREEN-VALUE = "") THEN
-          RUN SortCustomers("ttCustomer","",""). 
-       ELSE
-          RUN SortCustomers("ttCustomer","WHERE Name BEGINS " + QUOTER(fiCustName:SCREEN-VALUE),"").
-   END.
-      
-   IF INT(fiCustNum:SCREEN-VALUE) <> 0 THEN 
-    DO:
-      IF (fiCustName:SCREEN-VALUE = "") THEN 
-        DO:
-           RUN SortCustomers("ttCustomer","",""). 
-           APPLY "VALUE-CHANGED" TO fiCustNum.
-        END.
-        ELSE
-           RUN SortCustomers("ttCustomer","WHERE Name BEGINS " + QUOTER(fiCustName:SCREEN-VALUE) + 
-                             " AND CustNum >=" + fiCustNum:SCREEN-VALUE,"").              
-    END.
-    
-    APPLY "VALUE-CHANGED" TO brCustomers.              
+DO:         
+   RUN SortCustomers("ttCustomer","").     
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -399,17 +390,7 @@ END.
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL fiCustNum PDC-Win
 ON VALUE-CHANGED OF fiCustNum IN FRAME DEFAULT-FRAME
 DO: 
-   IF INT(fiCustNum:SCREEN-VALUE) = 0 THEN 
-      RUN SortCustomers("ttCustomer","","").
-   ELSE    
-      RUN SortCustomers("ttCustomer","WHERE CustNum >=" + fiCustNum:SCREEN-VALUE,"").
-      
-            
-   IF fiCustName = "" THEN
-      RUN SortCustomers("ttCustomer","WHERE CustNum >=" + fiCustNum:SCREEN-VALUE +
-                        " AND Name BEGINS " + QUOTER(fiCustName:SCREEN-VALUE),"").
-       
-   APPLY "VALUE-CHANGED" TO brCustomers.
+  RUN SortCustomers("ttCustomer",""). 
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -487,7 +468,7 @@ END.
 ON CHOOSE OF MENU-ITEM m_First /* First */
 DO:
     RUN CustBrowseNavigation("First").    
-    APPLY "VALUE-CHANGED" TO brCustomers IN FRAME {&FRAME-NAME}.     
+    APPLY "VALUE-CHANGED" TO {&BROWSE-NAME} IN FRAME {&FRAME-NAME}.     
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -499,7 +480,7 @@ END.
 ON CHOOSE OF MENU-ITEM m_Last /* Last */
 DO:
     RUN CustBrowseNavigation("Last").    
-    APPLY "VALUE-CHANGED" TO brCustomers IN FRAME {&FRAME-NAME}.
+    APPLY "VALUE-CHANGED" TO {&BROWSE-NAME} IN FRAME {&FRAME-NAME}.
 END.
 
 /* _UIB-CODE-BLOCK-END */
@@ -587,7 +568,7 @@ PROCEDURE CustBrowseNavigation :
           APPLY "END" TO BROWSE {&BROWSE-NAME}.     
     END CASE.
     
- APPLY "VALUE-CHANGED" TO brCustomers IN FRAME {&FRAME-NAME}.
+ APPLY "VALUE-CHANGED" TO {&BROWSE-NAME} IN FRAME {&FRAME-NAME}.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
@@ -606,7 +587,7 @@ PROCEDURE CustDetails :
     END.
       
     PUBLISH "FetchCustomer"(ttCustomer.CustNum).
-    APPLY "VALUE-CHANGED" TO brCustomers IN FRAME {&FRAME-NAME}.
+    APPLY "VALUE-CHANGED" TO {&BROWSE-NAME} IN FRAME {&FRAME-NAME}.
     
 END PROCEDURE.
 
@@ -673,8 +654,8 @@ PROCEDURE EditCustomer :
    DEFINE VARIABLE rowRowIdent AS ROWID NO-UNDO.
    DEFINE VARIABLE iCount      AS INTEGER.
    
-   DO iCount = 1 TO brCustomers:NUM-ITERATIONS IN FRAME {&FRAME-NAME}:
-        IF brCustomers:IS-ROW-SELECTED(iCount) THEN LEAVE. 
+   DO iCount = 1 TO {&BROWSE-NAME}:NUM-ITERATIONS IN FRAME {&FRAME-NAME}:
+        IF {&BROWSE-NAME}:IS-ROW-SELECTED(iCount) THEN LEAVE. 
    END.
       
    RUN gCustMaint.w ( INPUT "Mod":U,  
@@ -687,9 +668,9 @@ PROCEDURE EditCustomer :
     rowRowIdent = ttCustomerUpd.RowIdent.
     BUFFER-COPY ttCustomerUpd TO ttCustomer.
 
-    brCustomers:SET-REPOSITIONED-ROW(iCount) IN FRAME {&FRAME-NAME}. 
+    {&BROWSE-NAME}:SET-REPOSITIONED-ROW(iCount) IN FRAME {&FRAME-NAME}. 
     FIND ttCustomer WHERE ttCustomer.rowIdent = rowRowIdent.
-    REPOSITION brCustomers TO ROWID ROWID(ttCustomer) NO-ERROR.
+    REPOSITION {&BROWSE-NAME} TO ROWID ROWID(ttCustomer) NO-ERROR.
     
 END PROCEDURE.
 
@@ -731,8 +712,8 @@ PROCEDURE InitializeObjects :
  
  RUN GetCustData  IN hDataUtil (OUTPUT TABLE ttCustomer).
  
- brCustomers:LOAD-MOUSE-POINTER("Glove") IN FRAME {&FRAME-NAME}.
- APPLY "VALUE-CHANGED" TO brCustomers.
+ {&BROWSE-NAME}:LOAD-MOUSE-POINTER("Glove") IN FRAME {&FRAME-NAME}.
+ APPLY "VALUE-CHANGED" TO {&BROWSE-NAME}.
  
 END PROCEDURE.
 
@@ -751,7 +732,7 @@ PROCEDURE NavButtonSwitch :
     iCurrentRowInBrowse = CURRENT-RESULT-ROW("brCustomers").
     iLastRowInBrowse =    NUM-RESULTS("brCustomers").   
 
-    IF iCurrentRowInBrowse = 1 THEN 
+    IF iCurrentRowInBrowse = 1 THEN
         PUBLISH "SetButtons"("FirstOff").
     ELSE
         PUBLISH "SetButtons"("FirstOn").
@@ -810,15 +791,15 @@ PROCEDURE SortCustomers :
  Notes:
 ------------------------------------------------------------------------------*/
  DEFINE INPUT PARAMETER pcTableName      AS CHARACTER NO-UNDO.
- DEFINE INPUT PARAMETER pcWhereClause    AS CHARACTER NO-UNDO.
+ //DEFINE INPUT PARAMETER pcWhereClause    AS CHARACTER NO-UNDO. // wordt niet gebruikt
  DEFINE INPUT PARAMETER pcSort           AS CHARACTER NO-UNDO.
 
  DEFINE VARIABLE hQuery      AS HANDLE      NO-UNDO.
  DEFINE VARIABLE cPredicate  AS CHARACTER   NO-UNDO.
  
- cPredicate = SUBSTITUTE("FOR EACH &1 NO-LOCK &2 &3":U,pcTableName,pcWhereClause,pcSort).
-                 
- hQuery = BROWSE brCustomers:QUERY.
+ cPredicate = SUBSTITUTE("FOR EACH &1 NO-LOCK &2 &3":U,pcTableName,GetWhereClause(),pcSort).
+ 
+ hQuery = BROWSE {&BROWSE-NAME}:QUERY.
  hQuery:QUERY-CLOSE().
  hQuery:QUERY-PREPARE(cPredicate).
  hQuery:QUERY-OPEN().
@@ -827,4 +808,42 @@ END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
+
+
+/* ************************  Function Implementations ***************** */
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _FUNCTION GetWhereClause PDC-Win
+FUNCTION GetWhereClause RETURNS CHARACTER 
+  (  ):
+/*------------------------------------------------------------------------------
+ Purpose:  
+ Notes: Met hulp van Korak deze functie gemaakt ...
+------------------------------------------------------------------------------*/
+        DEFINE VARIABLE cWhereClause AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE cName        AS CHARACTER NO-UNDO.
+        DEFINE VARIABLE iCustNum     AS INTEGER   NO-UNDO.
+        
+        DO WITH FRAME {&FRAME-NAME}:
+            ASSIGN iCustNum = INT(fiCustNum:SCREEN-VALUE)
+                   cName = fiCustName:SCREEN-VALUE.
+        END.    
+        
+        IF iCustNum > 0 THEN 
+            ASSIGN cWhereClause = SUBSTITUTE("ttCustomer.CustNum >= &1 ",iCustNum).
+        
+        IF cName > "" THEN
+            ASSIGN cWhereClause = TRIM(SUBSTITUTE("&1 &2 &3",
+                                             cWhereClause,
+                                             (IF cWhereClause > "" THEN "AND" ELSE ""),
+                                             SUBSTITUTE("ttCustomer.Name BEGINS &1 ",QUOTER(cName)))).
+                                             
+        IF cWhereClause > "" THEN
+            ASSIGN cWhereClause = "WHERE " + cWhereClause.
+       
+        RETURN cWhereClause.
+END FUNCTION.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
 

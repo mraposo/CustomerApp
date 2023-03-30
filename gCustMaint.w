@@ -30,9 +30,8 @@
 /*----------------------------------------------------------------------*/
 
 /* ***************************  Definitions  ************************** */
-{ttCustomer.i}
-{ttCustomer.i &Suffix=Upd}
 {ttTables.i}
+{ttTables.i &Suffix=Upd}
 /* Parameters Definitions ---                                           */
 DEFINE INPUT PARAMETER pcMode        AS CHARACTER NO-UNDO.
 DEFINE INPUT PARAMETER phProcLib     AS HANDLE NO-UNDO.
@@ -42,7 +41,7 @@ DEFINE INPUT PARAMETER prowRowId     AS ROWID NO-UNDO.
 DEFINE OUTPUT PARAMETER TABLE FOR ttCustomerUpd.
 
 /* Local Variable Definitions ---                                       */
-DEFINE VARIABLE ghDataUtil   AS HANDLE  NO-UNDO.
+DEFINE VARIABLE hDataUtil   AS HANDLE  NO-UNDO.
 DEFINE VARIABLE lEmailCheck  AS LOGICAL NO-UNDO.
 
 /* _UIB-CODE-BLOCK-END */
@@ -425,11 +424,11 @@ PROCEDURE InitializeObjects :
   Parameters:  <none>
   Notes:       
 ------------------------------------------------------------------------------*/
- ghDataUtil = DYNAMIC-FUNCTION('RunPersistent' IN phProcLib, "DataUtil.p":U).
+ hDataUtil = DYNAMIC-FUNCTION('RunPersistent' IN phProcLib, "DataUtil.p":U).
 
  DO WITH FRAME {&FRAME-NAME}:
     ttCustomerUpd.SalesRep:DELIMITER = ";":U.
-    RUN GetRepData IN ghDataUtil(OUTPUT TABLE ttSalesRep).
+    RUN GetRepData IN hDataUtil(OUTPUT TABLE ttSalesRep).
     FOR EACH ttSalesRep:
         ttCustomerUpd.SalesRep:ADD-LAST(ttSalesRep.RepName, ttSalesRep.SalesRep).
     END.
@@ -437,7 +436,7 @@ PROCEDURE InitializeObjects :
  
  IF pcMode = "Mod":U THEN
  DO:
-    RUN GetCustRecord IN ghDataUtil (OUTPUT TABLE ttCustomerUpd,
+    RUN GetCustRecord IN hDataUtil (OUTPUT TABLE ttCustomerUpd,
                                      INPUT piNumOfOrders,
                                      INPUT prowRowId).                                  
     IF RETURN-VALUE = "" THEN
@@ -484,10 +483,10 @@ DO WITH FRAME {&FRAME-NAME}:
                       
     IF lAnswer THEN
      DO:
-          ASSIGN {&DISPLAYED-FIELDS}.
-          RUN SaveCustRecord IN ghDataUtil (INPUT-OUTPUT TABLE ttCustomerUpd,
-                                            INPUT piNumOfOrders,
-                                            INPUT pcMode).                                                           
+        ASSIGN {&DISPLAYED-FIELDS}.
+        RUN SaveCustRecord IN hDataUtil (INPUT-OUTPUT TABLE ttCustomerUpd,
+                                         INPUT piNumOfOrders,
+                                         INPUT pcMode).                                                           
        IF RETURN-VALUE <> "" THEN
        DO:
            MESSAGE RETURN-VALUE

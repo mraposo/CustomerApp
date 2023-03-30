@@ -23,9 +23,8 @@
   ----------------------------------------------------------------------*/
 /*          This .W file was created with the Progress AppBuilder.      */
 /*----------------------------------------------------------------------*/
-{ttCustomer.i}
-{ttCustomer.i &Suffix=Upd}
 {ttTables.i}
+{ttTables.i &Suffix=Upd}
 /* ***************************  Definitions  ************************** */
 
 /* _UIB-CODE-BLOCK-END */
@@ -131,6 +130,38 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-DeleteOrder) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE DeleteOrder Procedure
+PROCEDURE DeleteOrder:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+DEFINE INPUT PARAMETER piOrderNum AS INTEGER NO-UNDO.
+
+FIND Order WHERE Order.Ordernum = piOrderNum EXCLUSIVE-LOCK NO-ERROR.
+IF AVAILABLE Order THEN 
+DO:
+    DELETE Order.
+    RETURN.
+END.
+ELSE IF LOCKED (Order) THEN
+    RETURN "The record is locked. Try again later..".
+  ELSE
+    RETURN "Record has already been deleted!".
+    
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-GetCustData) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetCustData Procedure 
@@ -207,6 +238,85 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+/*
+&IF DEFINED(EXCLUDE-GetInvoiceData) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetInvoiceData Procedure
+PROCEDURE GetInvoiceData:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:  wordt niet gebruikt 
+------------------------------------------------------------------------------*/
+DEFINE OUTPUT PARAMETER TABLE FOR ttInvoice.
+DEFINE INPUT PARAMETER piValue AS INTEGER NO-UNDO.
+MESSAGE piValue
+VIEW-AS ALERT-BOX.
+EMPTY TEMP-TABLE ttInvoice NO-ERROR.
+
+FOR EACH Invoice WHERE Invoice.OrderNum = piValue NO-LOCK:
+    CREATE ttInvoice.
+    BUFFER-COPY Invoice TO ttInvoice.
+    ASSIGN ttInvoice.RowIdent = ROWID(Invoice).
+    RETURN.
+END.    
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+*/
+
+&IF DEFINED(EXCLUDE-GetInvoiceRecord) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetInvoiceRecord Procedure
+PROCEDURE GetInvoiceRecord:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+  DEFINE OUTPUT PARAMETER TABLE FOR ttInvoice.
+  DEFINE INPUT  PARAMETER piOrderNum AS INTEGER NO-UNDO.
+
+  EMPTY TEMP-TABLE ttInvoice NO-ERROR.
+
+/*  IF piValue <> ? THEN                                               */
+/*      FIND Invoice WHERE Invoice.OrderNum = piValue NO-LOCK NO-ERROR.*/
+/*  ELSE                                                               */
+/*      FIND LAST Invoice NO-LOCK NO-ERROR.                            */
+/*  IF AVAILABLE Invoice THEN                                          */
+/*  DO:                                                                */
+/*      CREATE ttInvoice.                                              */
+/*      BUFFER-COPY Invoice TO ttInvoice.                              */
+/*      ASSIGN ttInvoice.RowIdent = ROWID(Invoice).                    */
+/*      RETURN.                                                        */
+/*  END.                                                               */
+/*  ELSE                                                               */
+/*      RETURN "Record has been deleted!".                             */
+
+    FIND FIRST Invoice WHERE Invoice.OrderNum = piOrderNum NO-LOCK NO-ERROR.
+    IF AVAILABLE Invoice THEN 
+    DO:
+        CREATE ttInvoice.
+        BUFFER-COPY Invoice TO ttInvoice.
+        ASSIGN ttInvoice.RowIdent = ROWID(Invoice).
+        RETURN.
+    END.
+    ELSE DO:
+        MESSAGE "Invoice not available" VIEW-AS ALERT-BOX.
+        RETURN NO-APPLY. // scherm blijft openen..  is niet de bedoeling als er geen invoice is.
+    END.
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-GetOrderData) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetOrderData Procedure 
@@ -235,6 +345,59 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-GetOrderRecord) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetOrderRecord Procedure
+PROCEDURE GetOrderRecord:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+    DEFINE OUTPUT PARAMETER TABLE FOR ttOrder.
+    DEFINE INPUT PARAMETER piOrderNum AS INTEGER NO-UNDO.
+    
+    EMPTY TEMP-TABLE ttOrder.
+
+    FIND Order NO-LOCK WHERE Order.Ordernum = piOrderNum.
+    IF AVAILABLE Order THEN
+    DO:
+        CREATE ttOrder.
+        BUFFER-COPY Order TO ttOrder.
+        RETURN.
+    END.
+    ELSE
+    DO:
+        MESSAGE "Order not available" VIEW-AS ALERT-BOX.
+        RETURN.
+    END.
+
+/*
+  IF prOrderRow <> ? THEN
+      FIND Order WHERE ROWID(Order) = prOrderRow NO-LOCK NO-ERROR.
+  ELSE
+      FIND LAST Order NO-LOCK NO-ERROR.  
+  IF AVAILABLE Order THEN
+  DO:
+      CREATE ttOrder.
+      BUFFER-COPY Order TO ttOrder.
+      ASSIGN ttOrder.RowIdent = ROWID(Order).
+      RETURN.
+  END.
+  ELSE
+      RETURN "Record has been deleted!".  
+*/
+
+
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-GetRepData) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE GetRepData Procedure 
@@ -309,6 +472,47 @@ END PROCEDURE.
 &ANALYZE-RESUME
 
 &ENDIF
+
+&IF DEFINED(EXCLUDE-SaveOrderRecord) = 0 &THEN
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SaveOrderRecord Procedure
+PROCEDURE SaveOrderRecord:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+DEFINE INPUT-OUTPUT PARAMETER TABLE FOR ttOrder.
+DEFINE INPUT PARAMETER pcMode AS CHARACTER NO-UNDO.
+
+FIND FIRST ttOrder.
+    DO TRANSACTION:
+        IF pcMode = "New" THEN 
+            CREATE Order.
+        ELSE
+            FIND Order WHERE Order.Ordernum = ttOrder.Ordernum 
+                EXCLUSIVE-LOCK NO-WAIT NO-ERROR.
+        /* Do the following for both new and modified records */
+        IF AVAILABLE Order THEN
+            BUFFER-COPY ttOrder TO Order.
+        ELSE
+            IF LOCKED (Order) THEN
+                RETURN "Record is locked.  Try later.".
+            ELSE 
+                RETURN "Record has been deleted!".
+    END. /* Transaction */
+    FIND CURRENT Order NO-LOCK NO-ERROR.
+    BUFFER-COPY Order TO ttOrder.
+    ttOrder.rowIdent = ROWID(Order).
+    RETURN.
+END PROCEDURE.
+    
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ENDIF
+
+
 &IF DEFINED(EXCLUDE-Shutdown) = 0 &THEN
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Shutdown Procedure 
