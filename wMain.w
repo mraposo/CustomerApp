@@ -793,7 +793,6 @@ PROCEDURE SortCustomers :
  Notes:
 ------------------------------------------------------------------------------*/
  DEFINE INPUT PARAMETER pcTableName      AS CHARACTER NO-UNDO.
- //DEFINE INPUT PARAMETER pcWhereClause    AS CHARACTER NO-UNDO. // wordt niet gebruikt
  DEFINE INPUT PARAMETER pcSort           AS CHARACTER NO-UNDO.
 
  DEFINE VARIABLE hQuery      AS HANDLE      NO-UNDO.
