@@ -33,9 +33,8 @@
 CREATE WIDGET-POOL.
 
 /* ***************************  Definitions  ************************** */
-{ttCustomer.i}
-{ttCustomer.i &Suffix=Upd}
 {ttTables.i}
+{ttTables.i &Suffix=Upd}
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */

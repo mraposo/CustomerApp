@@ -1,16 +1,8 @@
 &ANALYZE-SUSPEND _VERSION-NUMBER AB_v10r12 GUI
 &ANALYZE-RESUME
 /* Connected Databases 
-          sports2000       PROGRESS
 */
 &Scoped-define WINDOW-NAME C-Win
-
-
-/* Temp-Table and Buffer definitions                                    */
-
-
-
-
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _DEFINITIONS C-Win 
 /*------------------------------------------------------------------------
 
@@ -41,15 +33,15 @@
 CREATE WIDGET-POOL.
 
 /* ***************************  Definitions  ************************** */
-{ttCustomer.i}
-{ttCustomer.i &Suffix=Upd}
 {ttTables.i}
+{ttTables.i &Suffix=Upd}
 /* Parameters Definitions ---                                           */
 
 /* Local Variable Definitions ---                                       */
-DEFINE VARIABLE ghProcLib   AS HANDLE NO-UNDO.
-DEFINE VARIABLE ghDataUtil  AS HANDLE NO-UNDO.
-DEFINE VARIABLE gCustNum    AS INTEGER NO-UNDO.
+DEFINE VARIABLE hProcLib   AS HANDLE NO-UNDO.
+DEFINE VARIABLE hDataUtil  AS HANDLE NO-UNDO.
+DEFINE VARIABLE iCustNum    AS INTEGER NO-UNDO.
+
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
@@ -69,7 +61,7 @@ DEFINE VARIABLE gCustNum    AS INTEGER NO-UNDO.
 &Scoped-define INTERNAL-TABLES ttOrder
 
 /* Definitions for BROWSE brOrders                                      */
-&Scoped-define FIELDS-IN-QUERY-brOrders ttOrder.CustNum ttOrder.Ordernum ttOrder.OrderStatus ttOrder.Instructions ttOrder.Carrier   
+&Scoped-define FIELDS-IN-QUERY-brOrders ttOrder.CustNum ttOrder.Ordernum ttOrder.OrderStatus ttOrder.Creditcard ttOrder.Carrier   
 &Scoped-define ENABLED-FIELDS-IN-QUERY-brOrders   
 &Scoped-define SELF-NAME brOrders
 &Scoped-define QUERY-STRING-brOrders FOR EACH ttOrder NO-LOCK INDEXED-REPOSITION
@@ -83,7 +75,7 @@ DEFINE VARIABLE gCustNum    AS INTEGER NO-UNDO.
     ~{&OPEN-QUERY-brOrders}
 
 /* Standard List Definitions                                            */
-&Scoped-Define ENABLED-OBJECTS RECT-15 brOrders BtnDone 
+&Scoped-Define ENABLED-OBJECTS RECT-15 brOrders btnNewOrder BtnDone 
 
 /* Custom List Definitions                                              */
 /* List-1,List-2,List-3,List-4,List-5,List-6                            */
@@ -98,15 +90,27 @@ DEFINE VARIABLE gCustNum    AS INTEGER NO-UNDO.
 /* Define the widget handle for the window                              */
 DEFINE VAR C-Win AS WIDGET-HANDLE NO-UNDO.
 
+/* Menu Definitions                                                     */
+DEFINE MENU POPUP-MENU-brOrders 
+       MENU-ITEM m_Invoice      LABEL "Invoice"       
+       RULE
+       MENU-ITEM m_Edit         LABEL "Edit Order"    
+       MENU-ITEM m_Delete       LABEL "Delete Order"  .
+
+
 /* Definitions of the field level widgets                               */
 DEFINE BUTTON BtnDone DEFAULT 
      LABEL "&Sluiten" 
-     SIZE 15 BY 1.13
+     SIZE 15 BY 1.15
      BGCOLOR 8 .
+
+DEFINE BUTTON btnNewOrder 
+     LABEL "New Order" 
+     SIZE 15 BY 1.12.
 
 DEFINE RECTANGLE RECT-15
      EDGE-PIXELS 2 GRAPHIC-EDGE  NO-FILL   
-     SIZE 98 BY 14.06.
+     SIZE 96 BY 14.12.
 
 /* Query definitions                                                    */
 &ANALYZE-SUSPEND
@@ -118,25 +122,26 @@ DEFINE QUERY brOrders FOR
 DEFINE BROWSE brOrders
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _DISPLAY-FIELDS brOrders C-Win _FREEFORM
   QUERY brOrders NO-LOCK DISPLAY
-      ttOrder.CustNum FORMAT ">>>>9":U
-      ttOrder.Ordernum FORMAT "zzzzzzzzz9":U
+      ttOrder.CustNum     FORMAT ">>>>9":U
+      ttOrder.Ordernum    FORMAT "zzzzzzzzz9":U
       ttOrder.OrderStatus FORMAT "x(20)":U
-      ttOrder.Creditcard FORMAT "x(25)":U
-      ttOrder.Carrier FORMAT "x(25)":U
+      ttOrder.Creditcard  FORMAT "x(25)":U
+      ttOrder.Carrier     FORMAT "x(25)":U
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
-    WITH NO-ROW-MARKERS SEPARATORS SIZE 90 BY 10.75 FIT-LAST-COLUMN.
+    WITH NO-ROW-MARKERS SEPARATORS SIZE 90 BY 10.77 FIT-LAST-COLUMN.
 
 
 /* ************************  Frame Definitions  *********************** */
 
 DEFINE FRAME DEFAULT-FRAME
-     brOrders AT ROW 2.25 COL 7 WIDGET-ID 200
-     BtnDone AT ROW 14 COL 83 WIDGET-ID 2
+     brOrders AT ROW 2.31 COL 7 WIDGET-ID 200
+     btnNewOrder AT ROW 13.92 COL 7 WIDGET-ID 8
+     BtnDone AT ROW 13.92 COL 82 WIDGET-ID 2
      "Orders" VIEW-AS TEXT
-          SIZE 8 BY .94 AT ROW 1 COL 10 WIDGET-ID 6
+          SIZE 8 BY .92 AT ROW 1 COL 10 WIDGET-ID 6
           FGCOLOR 9 FONT 6
-     RECT-15 AT ROW 1.47 COL 3 WIDGET-ID 4
+     RECT-15 AT ROW 1.46 COL 3 WIDGET-ID 4
     WITH 1 DOWN NO-BOX KEEP-TAB-ORDER OVERLAY 
          SIDE-LABELS NO-UNDERLINE THREE-D 
          AT COL 1 ROW 1
@@ -151,14 +156,6 @@ DEFINE FRAME DEFAULT-FRAME
    Type: Window
    Allow: Basic,Browse,DB-Fields,Window,Query
    Other Settings: COMPILE
-   Temp-Tables and Buffers:
-      TABLE: ttOrder T "?" NO-UNDO Sports2000 Order
-      ADDITIONAL-FIELDS:
-          FIELD RowIdent AS ROWID
-          INDEX RowIdent RowIdent
-          
-      END-FIELDS.
-   END-TABLES.
  */
 &ANALYZE-RESUME _END-PROCEDURE-SETTINGS
 
@@ -170,20 +167,20 @@ IF SESSION:DISPLAY-TYPE = "GUI":U THEN
          HIDDEN             = YES
          TITLE              = "Orders"
          HEIGHT             = 14.81
-         WIDTH              = 101.25
-         MAX-HEIGHT         = 17.5
-         MAX-WIDTH          = 156.63
-         VIRTUAL-HEIGHT     = 17.5
-         VIRTUAL-WIDTH      = 156.63
-         RESIZE             = YES
-         SCROLL-BARS        = NO
-         STATUS-AREA        = NO
+         WIDTH              = 99.57
+         MAX-HEIGHT         = 17.54
+         MAX-WIDTH          = 156.57
+         VIRTUAL-HEIGHT     = 17.54
+         VIRTUAL-WIDTH      = 156.57
+         RESIZE             = yes
+         SCROLL-BARS        = no
+         STATUS-AREA        = no
          BGCOLOR            = ?
          FGCOLOR            = ?
-         KEEP-FRAME-Z-ORDER = YES
-         THREE-D            = YES
-         MESSAGE-AREA       = NO
-         SENSITIVE          = YES.
+         KEEP-FRAME-Z-ORDER = yes
+         THREE-D            = yes
+         MESSAGE-AREA       = no
+         SENSITIVE          = yes.
 ELSE {&WINDOW-NAME} = CURRENT-WINDOW.
 
 &IF '{&WINDOW-SYSTEM}' NE 'TTY' &THEN
@@ -204,8 +201,12 @@ IF NOT C-Win:LOAD-ICON("adeicon/orders.ico":U) THEN
 /* SETTINGS FOR FRAME DEFAULT-FRAME
    FRAME-NAME                                                           */
 /* BROWSE-TAB brOrders RECT-15 DEFAULT-FRAME */
+ASSIGN 
+       brOrders:POPUP-MENU IN FRAME DEFAULT-FRAME             = MENU POPUP-MENU-brOrders:HANDLE
+       brOrders:ALLOW-COLUMN-SEARCHING IN FRAME DEFAULT-FRAME = TRUE.
+
 IF SESSION:DISPLAY-TYPE = "GUI":U AND VALID-HANDLE(C-Win)
-THEN C-Win:HIDDEN = NO.
+THEN C-Win:HIDDEN = no.
 
 /* _RUN-TIME-ATTRIBUTES-END */
 &ANALYZE-RESUME
@@ -255,6 +256,42 @@ END.
 &ANALYZE-RESUME
 
 
+&Scoped-define BROWSE-NAME brOrders
+&Scoped-define SELF-NAME brOrders
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brOrders C-Win
+ON DEFAULT-ACTION OF brOrders IN FRAME DEFAULT-FRAME
+DO:
+  RUN gOrderDetails.w (INPUT ttOrder.Ordernum, INPUT "View":U, OUTPUT TABLE ttOrderUpd).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL brOrders C-Win
+ON START-SEARCH OF brOrders IN FRAME DEFAULT-FRAME
+DO:
+    DEFINE VARIABLE iCount       AS INTEGER.
+    DEFINE VARIABLE rowRowId     AS ROWID.
+
+    rowRowId = ROWID(ttOrder).
+    DO iCount = 1 TO {&BROWSE-NAME}:NUM-ITERATIONS IN FRAME {&FRAME-NAME}:
+        IF {&BROWSE-NAME}:IS-ROW-SELECTED(iCount) THEN LEAVE.
+    END.
+
+    RUN SortOrders("ttOrder","","BY " + BROWSE {&BROWSE-NAME}:CURRENT-COLUMN:NAME).
+    
+    {&BROWSE-NAME}:SET-REPOSITIONED-ROW(iCount).
+    REPOSITION {&BROWSE-NAME} TO ROWID rowRowId.  
+      
+  APPLY "VALUE-CHANGED" TO {&BROWSE-NAME}.  
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+
 &Scoped-define SELF-NAME BtnDone
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL BtnDone C-Win
 ON CHOOSE OF BtnDone IN FRAME DEFAULT-FRAME /* Sluiten */
@@ -266,7 +303,98 @@ END.
 &ANALYZE-RESUME
 
 
-&Scoped-define BROWSE-NAME brOrders
+&Scoped-define SELF-NAME btnNewOrder
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL btnNewOrder C-Win
+ON CHOOSE OF btnNewOrder IN FRAME DEFAULT-FRAME /* New Order */
+DO:
+  /*
+  DEFINE VARIABLE rowRowIdent AS ROWID NO-UNDO.  
+  RUN gOrderMaint.w (INPUT ttOrder.Ordernum, 
+                     INPUT "New":U,
+                     OUTPUT TABLE ttOrderUpd).
+                     
+  //FIND FIRST ttOrderUpd.
+  //CREATE ttOrder.
+  //BUFFER-COPY ttOrderUpd TO ttOrder.
+  */
+    DEFINE VARIABLE rowRowIdent AS ROWID NO-UNDO.
+    DEFINE VARIABLE iCount      AS INTEGER.
+    RUN gOrderMaint.w (INPUT ttOrder.Ordernum, 
+                       INPUT "New":U,
+                       INPUT ttOrder.RowIdent, 
+                       OUTPUT TABLE ttOrderUpd).
+    
+    //FIND FIRST ttOrder.
+    //rowRowIdent = ttOrderUpd.RowIdent.
+    //BUFFER-COPY ttOrderUpd TO ttOrder.
+
+    //brOrders:SET-REPOSITIONED-ROW(iCount) IN FRAME {&FRAME-NAME}. 
+    //FIND ttOrder WHERE ttOrder.rowIdent = rowRowIdent.
+    //REPOSITION brOrders TO ROWID ROWID(ttOrder) NO-ERROR.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME m_Delete
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Delete C-Win
+ON CHOOSE OF MENU-ITEM m_Delete /* Delete Order */
+DO:
+   MESSAGE "Wilt u deze bestelling verwijderen?"   
+        VIEW-AS ALERT-BOX QUESTION BUTTONS YES-NO UPDATE lAnswer AS LOGICAL .
+   
+   IF lAnswer THEN 
+   DO:
+    RUN DeleteOrder IN hDataUtil (INPUT ttOrder.Ordernum).
+    brOrders:DELETE-CURRENT-ROW() IN FRAME {&FRAME-NAME}.
+   END.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME m_Edit
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Edit C-Win
+ON CHOOSE OF MENU-ITEM m_Edit /* Edit Order */
+DO:
+    DEFINE VARIABLE rowRowIdent AS ROWID NO-UNDO.
+    DEFINE VARIABLE iCount      AS INTEGER.
+    
+    DO iCount = 1 TO {&BROWSE-NAME}:NUM-ITERATIONS IN FRAME {&FRAME-NAME}:
+        IF {&BROWSE-NAME}:IS-ROW-SELECTED(iCount) THEN LEAVE. 
+    END.
+    
+    RUN gOrderMaint.w (INPUT ttOrder.Ordernum, 
+                       INPUT "Edit":U, 
+                       INPUT ttOrder.RowIdent, 
+                       OUTPUT TABLE ttOrderUpd).
+    
+    FIND FIRST ttOrderUpd.
+    rowRowIdent = ttOrderUpd.RowIdent.
+    BUFFER-COPY ttOrderUpd TO ttOrder.
+
+    brOrders:SET-REPOSITIONED-ROW(iCount) IN FRAME {&FRAME-NAME}. 
+    FIND ttOrder WHERE ttOrder.rowIdent = rowRowIdent.
+    REPOSITION brOrders TO ROWID ROWID(ttOrder) NO-ERROR.
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
+&Scoped-define SELF-NAME m_Invoice
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _CONTROL m_Invoice C-Win
+ON CHOOSE OF MENU-ITEM m_Invoice /* Invoice */
+DO:
+      RUN gInvoice.w (INPUT ttOrder.Ordernum).
+END.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+
 &UNDEFINE SELF-NAME
 
 &ANALYZE-SUSPEND _UIB-CODE-BLOCK _CUSTOM _MAIN-BLOCK C-Win 
@@ -337,7 +465,7 @@ PROCEDURE enable_UI :
                These statements here are based on the "Other 
                Settings" section of the widget Property Sheets.
 ------------------------------------------------------------------------------*/
-  ENABLE RECT-15 brOrders BtnDone 
+  ENABLE RECT-15 brOrders btnNewOrder BtnDone 
       WITH FRAME DEFAULT-FRAME IN WINDOW C-Win.
   {&OPEN-BROWSERS-IN-QUERY-DEFAULT-FRAME}
   VIEW C-Win.
@@ -356,7 +484,7 @@ PROCEDURE fetchOrders :
     DEFINE INPUT PARAMETER piCustNum AS INTEGER NO-UNDO.
     DEFINE INPUT PARAMETER pcCustName AS CHARACTER NO-UNDO.
     
-    RUN GetOrderData IN ghDataUtil (INPUT piCustNum, OUTPUT TABLE ttOrder).
+    RUN GetOrderData IN hDataUtil (INPUT piCustNum, OUTPUT TABLE ttOrder).
      
    {&OPEN-QUERY-brOrders}
       
@@ -372,22 +500,49 @@ PROCEDURE InitializeObjects :
      Purpose:
      Notes:
     ------------------------------------------------------------------------------*/
-    RUN PersistentProc.p PERSISTENT SET ghProcLib.
-    ghDataUtil = DYNAMIC-FUNCTION('RunPersistent' IN ghProcLib, "DataUtil.p":U).
+    RUN PersistentProc.p PERSISTENT SET hProcLib.
+    hDataUtil = DYNAMIC-FUNCTION('RunPersistent' IN hProcLib, "DataUtil.p":U).
     
+    {&BROWSE-NAME}:LOAD-MOUSE-POINTER("Glove") IN FRAME {&FRAME-NAME}.
+    //APPLY "VALUE-CHANGED" TO brOrders IN FRAME {&FRAME-NAME}.
 END PROCEDURE.
 
 /* _UIB-CODE-BLOCK-END */
 &ANALYZE-RESUME
 
-&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Shutdown C-Win
-PROCEDURE Shutdown:
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE Shutdown C-Win 
+PROCEDURE Shutdown :
 /*------------------------------------------------------------------------------
      Purpose:
      Notes:
 ------------------------------------------------------------------------------*/
     IF THIS-PROCEDURE:PERSISTENT THEN
         DELETE PROCEDURE THIS-PROCEDURE.
+END PROCEDURE.
+
+/* _UIB-CODE-BLOCK-END */
+&ANALYZE-RESUME
+
+&ANALYZE-SUSPEND _UIB-CODE-BLOCK _PROCEDURE SortOrders C-Win
+PROCEDURE SortOrders:
+/*------------------------------------------------------------------------------
+ Purpose:
+ Notes:
+------------------------------------------------------------------------------*/
+ DEFINE INPUT PARAMETER pcTableName      AS CHARACTER NO-UNDO.
+ DEFINE INPUT PARAMETER pcWhereClause    AS CHARACTER NO-UNDO.
+ DEFINE INPUT PARAMETER pcSort           AS CHARACTER NO-UNDO.
+
+ DEFINE VARIABLE hQuery      AS HANDLE      NO-UNDO.
+ DEFINE VARIABLE cPredicate  AS CHARACTER   NO-UNDO.
+ 
+ cPredicate = SUBSTITUTE("FOR EACH &1 NO-LOCK &2 &3":U,pcTableName,pcWhereClause,pcSort).
+               
+ hQuery = BROWSE {&BROWSE-NAME}:QUERY.
+ hQuery:QUERY-CLOSE().
+ hQuery:QUERY-PREPARE(cPredicate).
+ hQuery:QUERY-OPEN().
+
 END PROCEDURE.
     
 /* _UIB-CODE-BLOCK-END */
